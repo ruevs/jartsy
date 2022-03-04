@@ -4,6 +4,8 @@
 // Copyright 2022 ruevs
 //-----------------------------------------------------------------------------
 #include "jartsy.h"
+#include "framebuffer/framebuffer.h"
+#include "exportfile/exportpgm.h"
 
 const char *PACKAGE_VERSION = "0.001";
 
@@ -144,7 +146,15 @@ static bool RunCommand(const std::vector<std::string> args) {
 
             pixmapCanvas.Clear();
 #endif
-            fprintf(stderr, "Doing nothing very quickly.\n");
+            FrameBuffer<int> frame(1024, 768);
+            frame[80][90] = 7;
+            fprintf(stderr, "Doing nothing very quickly %i.\n", frame[80][90]);
+
+            FrameBuffer<RGBColor> rgbfr(1024, 768);
+            rgbfr[80][90] = {255, 127, 0};
+            fprintf(stderr, "R: %u, G: %u B: %u\n", rgbfr[80][90].red, rgbfr[80][90].green,
+                    rgbfr[80][90].blue);
+            PGMWriter::ExportFrameBufferTo(output, rgbfr);
         };
     } else if(args[1] == "something-else") {
 		// Do something else
