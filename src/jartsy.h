@@ -33,6 +33,9 @@
 
 namespace JARTSy {
 
+using std::min;
+using std::max;
+
 [[noreturn]] void AssertFailure(const char *file, unsigned line, const char *function,
                                 const char *condition, const char *message);
 namespace Platform {

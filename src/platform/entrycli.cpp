@@ -150,10 +150,57 @@ static bool RunCommand(const std::vector<std::string> args) {
             frame[80][90] = 7;
             fprintf(stderr, "Doing nothing very quickly %i.\n", frame[80][90]);
 
-            FrameBuffer<RGBColor> rgbfr(1024, 768);
-            rgbfr[80][90] = {255, 127, 0};
-            fprintf(stderr, "R: %u, G: %u B: %u\n", rgbfr[80][90].red, rgbfr[80][90].green,
-                    rgbfr[80][90].blue);
+            // Just a stupid hack to generate the two images for homework two.
+            // To generate the images run:
+            //    jartsy.exe render -o %%.ppm --size 1024x768 rectangles circle
+            static int homeworkimage;
+
+            const size_t xr = 1024;
+            const size_t yr = 768;
+            FrameBuffer<RGBColor> rgbfr(xr, yr);
+
+            if(0 == homeworkimage) {
+                // numbrer of rectangles in X and Y direction
+                const size_t nxrect = 4;
+                const size_t nyrect = 4;
+                // rectangle size ceil (rounded up)
+                const size_t xrect = (xr + nxrect - 1) / nxrect;
+                const size_t yrect = (yr + nyrect - 1) / nyrect;
+                RGBColor pix{0, 0, 0};
+                for(int x = 0; x < xr; ++x) {
+                    if(0 == (x % xrect)) {
+                        pix.red += std::numeric_limits<uint8_t>::max() / nxrect;
+                    }
+                    pix.green = 0;
+                    for(int y = 0; y < yr; ++y) {
+                        if(0 == (y % yrect)) {
+                            pix.green += std::numeric_limits<uint8_t>::max() / nyrect;
+                        }
+                        pix.blue = (std::numeric_limits<uint8_t>::max() * rand()) / RAND_MAX;   // blue is random
+                        rgbfr[x][y] = pix;
+                    }
+                }
+            }
+
+            if(1 == homeworkimage) {
+                // coordinates of the center of the circle
+                const size_t xc = xr/2;
+                const size_t yc = yr/2;
+                // radius suqared
+                const size_t rsq = min(xr, yr) * min(xr, yr) / (4*4);
+                for(int x = 0; x < xr; ++x) {
+                    for(int y = 0; y < yr; ++y) {
+                        if((x - xc)*(x-xc) + (y - yc)*(y-yc) < rsq) {
+                            // we are in the circle
+                            rgbfr[x][y] = {57, 119, 34};   // circle color from my screen shot.
+                        } else {
+                            rgbfr[x][y] = {183, 183, 183};  // because that is what the backgroud is in my screen shot :-)
+                        }
+                    }
+                }
+            }
+            ++homeworkimage;
+
             PGMWriter::ExportFrameBufferTo(output, rgbfr);
         };
     } else if(args[1] == "something-else") {
