@@ -150,20 +150,16 @@ static bool RunCommand(const std::vector<std::string> args) {
 
             pixmapCanvas.Clear();
 #endif
-            FrameBuffer<int> frame(1024, 768);
-            frame[80][90] = 7;
-            fprintf(stderr, "Doing nothing very quickly %i.\n", frame[80][90]);
-
-            // Just a stupid hack to generate the two images for homework two.
+            // Just stupid hacks to generate the homework images
             // To generate the images run:
-            //    jartsy.exe render -o %%.ppm --size 1024x768 rectangles circle
+            //    jartsy.exe render -o %.ppm --size 1024x768 rectangles circle rays
             static int homeworkimage;
 
-            // Pixel resolution of the generated image
-            const size_t xr = 512;
-            const size_t yr = 512;
-//            const size_t xr = 1024;
-//            const size_t yr = 768;
+            fprintf(stderr, "Doing nothing very quickly %i.\n", homeworkimage);
+
+            // Pixel resolution of the generated images from the command line
+            const size_t xr = width;
+            const size_t yr = height;
             FrameBuffer<RGBColor> rgbfr(xr, yr);
 
             if(0 == homeworkimage) {
