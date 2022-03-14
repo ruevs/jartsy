@@ -6,6 +6,10 @@
 #include "jartsy.h"
 #include "framebuffer/framebuffer.h"
 #include "exportfile/exportpgm.h"
+#include "jartsyla.h"
+#include "ray.h"
+#include "film.h"
+#include "camera.h"
 
 const char *PACKAGE_VERSION = "0.001";
 
@@ -155,11 +159,16 @@ static bool RunCommand(const std::vector<std::string> args) {
             //    jartsy.exe render -o %%.ppm --size 1024x768 rectangles circle
             static int homeworkimage;
 
-            const size_t xr = 1024;
-            const size_t yr = 768;
+            // Pixel resolution of the generated image
+            const size_t xr = 512;
+            const size_t yr = 512;
+//            const size_t xr = 1024;
+//            const size_t yr = 768;
             FrameBuffer<RGBColor> rgbfr(xr, yr);
 
             if(0 == homeworkimage) {
+                // Homework 2 part 1
+
                 // numbrer of rectangles in X and Y direction
                 const size_t nxrect = 4;
                 const size_t nyrect = 4;
@@ -183,6 +192,8 @@ static bool RunCommand(const std::vector<std::string> args) {
             }
 
             if(1 == homeworkimage) {
+                // Homework 2 part 2
+
                 // coordinates of the center of the circle
                 const size_t xc = xr/2;
                 const size_t yc = yr/2;
@@ -199,6 +210,29 @@ static bool RunCommand(const std::vector<std::string> args) {
                     }
                 }
             }
+
+            if(2 == homeworkimage) {
+                // Homework 3 
+
+                // Size of the camra film/senzor in meters (world scale)
+                const Float xs = 2.;
+                const Float ys = 2.;
+                const Film film                = {{xr, yr}, (Float)sqrt(Sqr(xs) + Sqr(ys))};
+
+                const Transform cameraLocation = {{.0, .0, .0} /*transaltion*/, {} /*rotation*/, {1., 1., 1.} /*scale*/};
+                const Float focalLength        = 1; 
+
+                Camera camera(cameraLocation, film, focalLength);
+
+                for(int x = 0; x < xr; ++x) {
+                    for(int y = 0; y < yr; ++y) {
+                        Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
+                        rgbfr[x][y] = {(uint8_t)(ray.d.x * 255), (uint8_t)(ray.d.y * 255),
+                                       (uint8_t)abs(ray.d.z * 255)};
+                    }
+                }
+            }
+
             ++homeworkimage;
 
             PGMWriter::ExportFrameBufferTo(output, rgbfr);
