@@ -1,3 +1,6 @@
+#ifndef JARTSY_H
+#define JARTSY_H
+
 #include <cstdarg>
 #include <algorithm>
 #include <string>
@@ -5,6 +8,24 @@
 #include <functional>
 
 #include "platform/platform.h"
+
+// The type of floating point number used throughout (float or double or whatever)
+using Float = float;
+
+// The few floating-point equality comparisons in jartsy should have been
+// carefully considered, so we disable the -Wfloat-equal warning for them
+#ifdef __clang__
+#    define EXACT(expr) \
+        (_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wfloat-equal\"")( \
+            expr) _Pragma("clang diagnostic pop"))
+#else
+#    define EXACT(expr) (expr)
+#endif
+
+template<typename T>
+inline T Sqr(const T v) {
+    return v * v;
+}
 
 
 // Debugging functions
@@ -50,4 +71,6 @@ std::string jartsyprintf(const char *fmt, ...);
 
 #ifndef __OBJC__
 using namespace JARTSy;
+#endif
+
 #endif
