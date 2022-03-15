@@ -223,7 +223,7 @@ static bool RunCommand(const std::vector<std::string> args) {
                 for(int x = 0; x < xr; ++x) {
                     for(int y = 0; y < yr; ++y) {
                         Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
-                        rgbfr[x][y] = {(uint8_t)(ray.d.x * 255), (uint8_t)(ray.d.y * 255),
+                        rgbfr[x][y] = {(uint8_t)abs(ray.d.x * 255), (uint8_t)abs(ray.d.y * 255),
                                        (uint8_t)abs(ray.d.z * 255)};
                     }
                 }
