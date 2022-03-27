@@ -103,6 +103,7 @@ public:
 };
 
 using Point = Vector;   // Meeh this is not quite nice but anyway :-)
+using Normal = Vector;
 
 class Quaternion {
 public:

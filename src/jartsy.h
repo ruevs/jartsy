@@ -48,9 +48,10 @@ inline T Sqr(const T v) {
 #endif
 
 #define dbp JARTSy::Platform::DebugPrint
-#define DBPTRI(tri) \
-    dbp("tri: (%.3f %.3f %.3f) (%.3f %.3f %.3f) (%.3f %.3f %.3f)", CO((tri).a), CO((tri).b), \
-        CO((tri).c))
+#define CO(v) (v).x, (v).y, (v).z
+#define DBPTRI(a,op,b, eq, c) \
+    dbp("(%.3f %.3f %.3f) %s (%.3f %.3f %.3f) %s (%.3f %.3f %.3f)", CO(a), op, CO(b), eq,\
+        CO(c))
 
 namespace JARTSy {
 

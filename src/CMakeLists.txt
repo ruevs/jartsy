@@ -14,6 +14,11 @@ include_directories(
 set(jartsy_core
     jartsy.h
 	util.cpp
+	jartsyla.h
+	camera.h
+	ray.h
+	entities.h
+	entities.cpp
     framebuffer/framebuffer.h
     framebuffer/framebuffer.cpp)
 
