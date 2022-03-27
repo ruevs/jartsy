@@ -60,6 +60,76 @@ File formats:
 )", ".pgm");
 }
 
+void HW21(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+    // Homework 2 part 1 rectangles
+
+    // numbrer of rectangles in X and Y direction
+    const size_t nxrect = 4;
+    const size_t nyrect = 4;
+    // rectangle size ceil (rounded up)
+    const size_t xrect = (xr + nxrect - 1) / nxrect;
+    const size_t yrect = (yr + nyrect - 1) / nyrect;
+    RGBColor pix{0, 0, 0};
+    for(int x = 0; x < xr; ++x) {
+        if(0 == (x % xrect)) {
+            pix.red += std::numeric_limits<uint8_t>::max() / nxrect;
+        }
+        pix.green = 0;
+        for(int y = 0; y < yr; ++y) {
+            if(0 == (y % yrect)) {
+                pix.green += std::numeric_limits<uint8_t>::max() / nyrect;
+            }
+            pix.blue = (std::numeric_limits<uint8_t>::max() * rand()) / RAND_MAX; // blue is random
+            rgbfr[x][y] = pix;
+        }
+    }
+}
+
+void HW22(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+    // Homework 2 part 2 circle
+
+    // coordinates of the center of the circle
+    const size_t xc = xr / 2;
+    const size_t yc = yr / 2;
+    // radius suqared
+    const size_t rsq = min(xr, yr) * min(xr, yr) / (4 * 4);
+    for(int x = 0; x < xr; ++x) {
+        for(int y = 0; y < yr; ++y) {
+            if((x - xc) * (x - xc) + (y - yc) * (y - yc) < rsq) {
+                // we are in the circle
+                rgbfr[x][y] = {57, 119, 34}; // circle color from my screen shot.
+            } else {
+                rgbfr[x][y] = {183, 183,
+                               183}; // because that is what the backgroud is in my screen shot :-)
+            }
+        }
+    }
+}
+
+void HW30(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+    // Homework 3 rays
+
+    // Size of the camra film/senzor in meters (world scale)
+    const Float xs  = 2.;
+    const Float ys  = 2.;
+    const Film film = {{xr, yr}, (Float)sqrt(Sqr(xs) + Sqr(ys))};
+
+    const Transform cameraLocation = {
+        {.0, .0, .0} /*transaltion*/, {} /*rotation*/, {1., 1., 1.} /*scale*/};
+    const Float focalLength = 1;
+
+    Camera camera(cameraLocation, film, focalLength);
+
+    for(int x = 0; x < xr; ++x) {
+        for(int y = 0; y < yr; ++y) {
+            Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
+            rgbfr[x][y] = {(uint8_t)abs(ray.d.x * std::numeric_limits<uint8_t>::max()),
+                           (uint8_t)abs(ray.d.y * std::numeric_limits<uint8_t>::max()),
+                           (uint8_t)abs(ray.d.z * std::numeric_limits<uint8_t>::max())};
+        }
+    }
+}
+
 static bool RunCommand(const std::vector<std::string> args) {
     if(args.size() < 2) return false;
 
@@ -120,36 +190,6 @@ static bool RunCommand(const std::vector<std::string> args) {
         }
 
         runner = [&](const Platform::Path &output) {
-#if 0
-            Camera camera = {};
-            camera.pixelRatio = 1;
-            camera.gridFit    = true;
-            camera.width      = width;
-            camera.height     = height;
-            camera.projUp     = projUp;
-            camera.projRight  = projRight;
-
-            SS.GW.projUp      = projUp;
-            SS.GW.projRight   = projRight;
-            SS.GW.scale       = SS.GW.ZoomToFit(camera);
-            camera.scale      = SS.GW.scale;
-            camera.offset     = SS.GW.offset;
-            SS.GenerateAll();
-
-            CairoPixmapRenderer pixmapCanvas;
-            pixmapCanvas.antialias = true;
-            pixmapCanvas.SetLighting(SS.GW.GetLighting());
-            pixmapCanvas.SetCamera(camera);
-            pixmapCanvas.Init();
-
-            pixmapCanvas.StartFrame();
-            SS.GW.Draw(&pixmapCanvas);
-            pixmapCanvas.FlushFrame();
-            pixmapCanvas.FinishFrame();
-            pixmapCanvas.ReadFrame()->WritePng(output, /*flip=*/true);
-
-            pixmapCanvas.Clear();
-#endif
             // Just stupid hacks to generate the homework images
             // To generate the images run:
             //    jartsy.exe render -o %.ppm --size 1024x768 rectangles circle rays
@@ -158,75 +198,18 @@ static bool RunCommand(const std::vector<std::string> args) {
             fprintf(stderr, "Doing nothing very quickly %i.\n", homeworkimage);
 
             // Pixel resolution of the generated images from the command line
-            const size_t xr = width;
-            const size_t yr = height;
-            FrameBuffer<RGBColor> rgbfr(xr, yr);
+            FrameBuffer<RGBColor> rgbfr(width, height);
 
             if(0 == homeworkimage) {
-                // Homework 2 part 1
-
-                // numbrer of rectangles in X and Y direction
-                const size_t nxrect = 4;
-                const size_t nyrect = 4;
-                // rectangle size ceil (rounded up)
-                const size_t xrect = (xr + nxrect - 1) / nxrect;
-                const size_t yrect = (yr + nyrect - 1) / nyrect;
-                RGBColor pix{0, 0, 0};
-                for(int x = 0; x < xr; ++x) {
-                    if(0 == (x % xrect)) {
-                        pix.red += std::numeric_limits<uint8_t>::max() / nxrect;
-                    }
-                    pix.green = 0;
-                    for(int y = 0; y < yr; ++y) {
-                        if(0 == (y % yrect)) {
-                            pix.green += std::numeric_limits<uint8_t>::max() / nyrect;
-                        }
-                        pix.blue = (std::numeric_limits<uint8_t>::max() * rand()) / RAND_MAX;   // blue is random
-                        rgbfr[x][y] = pix;
-                    }
-                }
+                HW21(width, height, rgbfr);
             }
 
             if(1 == homeworkimage) {
-                // Homework 2 part 2
-
-                // coordinates of the center of the circle
-                const size_t xc = xr/2;
-                const size_t yc = yr/2;
-                // radius suqared
-                const size_t rsq = min(xr, yr) * min(xr, yr) / (4*4);
-                for(int x = 0; x < xr; ++x) {
-                    for(int y = 0; y < yr; ++y) {
-                        if((x - xc)*(x-xc) + (y - yc)*(y-yc) < rsq) {
-                            // we are in the circle
-                            rgbfr[x][y] = {57, 119, 34};   // circle color from my screen shot.
-                        } else {
-                            rgbfr[x][y] = {183, 183, 183};  // because that is what the backgroud is in my screen shot :-)
-                        }
-                    }
-                }
+                HW22(width, height, rgbfr);
             }
 
             if(2 == homeworkimage) {
-                // Homework 3 
-
-                // Size of the camra film/senzor in meters (world scale)
-                const Float xs = 2.;
-                const Float ys = 2.;
-                const Film film                = {{xr, yr}, (Float)sqrt(Sqr(xs) + Sqr(ys))};
-
-                const Transform cameraLocation = {{.0, .0, .0} /*transaltion*/, {} /*rotation*/, {1., 1., 1.} /*scale*/};
-                const Float focalLength        = 1; 
-
-                Camera camera(cameraLocation, film, focalLength);
-
-                for(int x = 0; x < xr; ++x) {
-                    for(int y = 0; y < yr; ++y) {
-                        Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
-                        rgbfr[x][y] = {(uint8_t)abs(ray.d.x * 255), (uint8_t)abs(ray.d.y * 255),
-                                       (uint8_t)abs(ray.d.z * 255)};
-                    }
-                }
+                HW30(width, height, rgbfr);
             }
 
             ++homeworkimage;
