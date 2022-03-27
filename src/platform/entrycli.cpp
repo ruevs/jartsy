@@ -10,6 +10,7 @@
 #include "ray.h"
 #include "film.h"
 #include "camera.h"
+#include "entities.h"
 
 const char *PACKAGE_VERSION = "0.001";
 
@@ -130,6 +131,45 @@ void HW30(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     }
 }
 
+void HW42(void) {
+    // Homework 4. Vector math.
+    dbp("\nLecture 4. Vector math.");
+    dbp("\n4.2: Cross product");
+    const Vector A{3.5, 0, 0};
+    const Vector B{1.75, 3.5, 0};
+    DBPTRI(A, "cross", B, "=", A.Cross(B));
+    const Vector C{3, -3, 1};
+    const Vector D{4, 9, 3};
+    DBPTRI(C, "cross", D, "=", C.Cross(D));
+    dbp("Magnitude (area of parallelogram) %f", C.Cross(D).Magnitude());
+    const Vector E{-12, 12, -4};
+    DBPTRI(C, "cross", E, "=", C.Cross(E));
+    dbp("Magnitude (area of parallelogram) %f", C.Cross(E).Magnitude());
+}
+
+void HW43(void) {
+    // Homework 4. Triangle normals.
+    dbp("\n4.3: Triangle normals");
+    const int nTria     = 3;
+    const Point p[nTria*3] = {{-1.75, -1.75, -3},  {1.75, -1.75, -3}, {0, 1.75, -3},
+                              {0, 0, -1}, {1, 0, 1}, {-1, 0, 1},
+                              {0.56, 1.11, 1.23}, {0.44, -2.368, -0.54}, {-1.56, 0.15, -1.92}};
+    const int vertexIndex[nTria*3] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    Normal n[nTria];
+    TriangleMesh trMesh{nTria, p, vertexIndex, n};
+
+    // Do not normalize the normals to use half their length as the surface of the triangles in the
+    // next step.
+    trMesh.CalclulateNormals(/*normalize=*/false);
+
+    for(int i = 0; i < nTria; ++i) {
+        dbp("Triangle %d", i);
+        DBPTRI(trMesh.p[trMesh.v[i + 0]], "", trMesh.p[trMesh.v[i + 1]],
+               "", trMesh.p[trMesh.v[i + 2]]);
+        dbp("Normal: (%.3f %.3f %.3f), area: %f", CO(trMesh.n[i]), 0.5 * trMesh.n[i].Magnitude());
+    }
+}
+
 static bool RunCommand(const std::vector<std::string> args) {
     if(args.size() < 2) return false;
 
@@ -210,6 +250,11 @@ static bool RunCommand(const std::vector<std::string> args) {
 
             if(2 == homeworkimage) {
                 HW30(width, height, rgbfr);
+            }
+
+            if(3 == homeworkimage) {
+                HW42();
+                HW43();
             }
 
             ++homeworkimage;
