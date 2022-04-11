@@ -11,6 +11,7 @@
 
 // The type of floating point number used throughout (float or double or whatever)
 using Float = float;
+static constexpr Float LENGTH_EPS = 1e-6;
 
 // The few floating-point equality comparisons in jartsy should have been
 // carefully considered, so we disable the -Wfloat-equal warning for them

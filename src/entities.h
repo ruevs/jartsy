@@ -2,6 +2,7 @@
 #define JARTSY_ENTITIES_H
 
 #include "jartsyla.h"
+#include "ray.h"
 
 class TriangleMesh {
 public:
@@ -14,7 +15,11 @@ public:
     Normal *n;
     // PAR@@@@@@ Does something else outside manage the momory for the triangle mesh?
 
+    bool Intersect(Ray &r) const;
     void CalclulateNormals(bool normalize=true);
+
+private:
+    inline bool IntersectTriangle(Ray &r, int tri) const;
 };
 
 #endif

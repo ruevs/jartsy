@@ -40,7 +40,7 @@ public:
 
     inline Vector operator+(const Vector &v) const { return {x + v.x, y + v.y, z + v.z}; }
     inline Vector operator-(const Vector &v) const { return {x - v.x, y - v.y, z - v.z}; }
-    inline Vector operator*(const Float &t) const { return {x * t, y * t, z * t}; }
+    inline Vector operator*(const Float t) const { return {x * t, y * t, z * t}; }
     inline auto operator/(const Float &t) const { return *this * (1 / t); }
     // The element wize vector multiplication I need ffor the scaling operation
     inline Vector operator*(const Vector &v) const { return {x * v.x, y * v.y, z * v.z}; }
@@ -101,6 +101,11 @@ public:
     Vector4 Project4d() const;
 */
 };
+
+inline Vector operator*(const Float t, const Vector &v) {
+    return v * t;
+}
+
 
 using Point = Vector;   // Meeh this is not quite nice but anyway :-)
 using Normal = Vector;
