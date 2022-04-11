@@ -170,6 +170,93 @@ void HW43(void) {
     }
 }
 
+void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+    // Homework 5.1 triangle intersection
+
+    // Size of the camra film/senzor in meters (world scale)
+    const Float xs  = 5.;
+    const Float ys  = 5.;
+    const Film film = {{xr, yr}, (Float)sqrt(Sqr(xs) + Sqr(ys))};
+
+    const Transform cameraLocation = {
+        {.0, .0, .0} /*transaltion*/, {} /*rotation*/, {1., 1., 1.} /*scale*/};
+    const Float focalLength = 1;
+
+    Camera camera(cameraLocation, film, focalLength);
+
+    Point points[3]   = {{-1.75, -1.75, -3}, {1.75, -1.75, -3}, {0, 1.75, -3}};
+    int vertexes[3]   = {0, 1, 2};
+    Normal normals[1] = {};
+    TriangleMesh mesh = {1, points, vertexes, normals};
+    mesh.CalclulateNormals();
+
+    for(int x = 0; x < xr; ++x) {
+        for(int y = 0; y < yr; ++y) {
+            Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
+            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
+            if(mesh.Intersect(ray)) {
+                rgbfr[x][y] = {c255, c255, c255};
+            } else {
+                rgbfr[x][y] = {(uint8_t)abs(ray.d.x * c255),
+                               (uint8_t)abs(ray.d.y * c255),
+                               (uint8_t)abs(ray.d.z * c255)};
+            }
+        }
+    }
+}
+
+void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+    // Homework 5.2 5.3 5.3 triangle mesh intersection
+
+    // Size of the camra film/senzor in meters (world scale)
+    const Float xs  = 2.;
+    const Float ys  = 2.;
+    const Film film = {{xr, yr}, (Float)sqrt(Sqr(xs) + Sqr(ys))};
+
+    const Transform cameraLocation = {
+        {.0, .0, .0} /*transaltion*/, {} /*rotation*/, {1., 1., 1.} /*scale*/};
+    const Float focalLength = 1;
+
+    Camera camera(cameraLocation, film, focalLength);
+
+    const int n        = 12; // triangles
+    Point points[9]   = {{0., 0., -3.},   {1., 0., -3.},   {1., 1., -4.},
+                       {0., 1., -3.},   {-1., 1., -4.}, {-1., 0., -3.},
+                       {-1., -1., -4.}, {0., -1., -3.}, {1., -1., -4.}};
+    int vertexes[n*3] = {
+        0,1,2,
+        0,2,3,
+        0,3,4,
+        0,4,5,
+        0,5,6,
+        0,6,7,
+        0,7,8,
+        0,8,1,
+
+        0,1,3,
+        0,3,5,
+        0,5,7,
+        0,7,1
+    };
+    Normal normals[n] = {};
+    TriangleMesh mesh = {n, points, vertexes, normals};
+    mesh.CalclulateNormals();
+
+    for(int x = 0; x < xr; ++x) {
+        for(int y = 0; y < yr; ++y) {
+            Ray ray            = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
+            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
+            if(mesh.Intersect(ray)) {
+                rgbfr[x][y] = {c255, c255, c255};
+            } else {
+                rgbfr[x][y] = {(uint8_t)abs(ray.d.x * c255), (uint8_t)abs(ray.d.y * c255),
+                               (uint8_t)abs(ray.d.z * c255)};
+            }
+        }
+    }
+}
+
+
 static bool RunCommand(const std::vector<std::string> args) {
     if(args.size() < 2) return false;
 
@@ -255,6 +342,14 @@ static bool RunCommand(const std::vector<std::string> args) {
             if(3 == homeworkimage) {
                 HW42();
                 HW43();
+            }
+
+            if(4 == homeworkimage) {
+                HW51(width, height, rgbfr);
+            }
+
+            if(5 == homeworkimage) {
+                HW5234(width, height, rgbfr);
             }
 
             ++homeworkimage;
