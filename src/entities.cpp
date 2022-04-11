@@ -12,7 +12,7 @@ void TriangleMesh::CalclulateNormals(bool normalize) {
     }
 }
 
-inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri) const {
+inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri, Intersection *ints) const {
     const Float rnProj = r.d.Dot(n[tri]);
     if(0 > rnProj) { // Triangle plane and ray are not parallel, ray is "outside"
         const Vector vr[3] = {p[v[3 * tri]], p[v[3 * tri + 1]], p[v[3 * tri + 2]]};
@@ -30,17 +30,20 @@ inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri) const {
                 r.tInt = rt; // Remember the intersection distance if it is the closest
                 // PAR@@@@ Here we should fill in some structure that describes the
                 // intersection - which entity, from which side etc...
+                ints->ip = p;
+                ints->n  = n[tri];
+                ints->material = material;
+                return true;
             }
-            return true;
         }
     } // else intersecting from inside? Refraction etc... PAR@@@@
     return false;
 }
 
-bool TriangleMesh::Intersect(Ray &r) const {
+bool TriangleMesh::Intersect(Ray &r, Intersection *ints) const {
     bool ret = false;
     for(int i = 0; i < nTri; ++i) {
-        ret |= IntersectTriangle(r, i);
+        ret |= IntersectTriangle(r, i, ints);
     }
     return ret;
 }

@@ -3,6 +3,16 @@
 
 #include "jartsyla.h"
 #include "ray.h"
+#include "material.h"
+
+// Carries the information about the intersection between a ray and an entity
+class Intersection {
+public:
+    Point ip;
+    Normal n;   // This is not enough - e.g. Phong shading... dn/du, dn/dv ?
+    Material *material;
+    // PAR@@@@ Entity reference? Materials? Textures?
+};
 
 class TriangleMesh {
 public:
@@ -13,13 +23,14 @@ public:
     const Point *p;
     const int *v;
     Normal *n;
+    Material *material;
     // PAR@@@@@@ Does something else outside manage the momory for the triangle mesh?
 
-    bool Intersect(Ray &r) const;
+    bool Intersect(Ray &r, Intersection *ints) const;
     void CalclulateNormals(bool normalize=true);
 
 private:
-    inline bool IntersectTriangle(Ray &r, int tri) const;
+    inline bool IntersectTriangle(Ray &r, int tri, Intersection *ints) const;
 };
 
 #endif

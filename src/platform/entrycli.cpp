@@ -194,7 +194,8 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
         for(int y = 0; y < yr; ++y) {
             Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
             const uint8_t c255 = std::numeric_limits<uint8_t>::max();
-            if(mesh.Intersect(ray)) {
+            Intersection ints;
+            if(mesh.Intersect(ray, &ints)) {
                 rgbfr[x][y] = {c255, c255, c255};
             } else {
                 rgbfr[x][y] = {(uint8_t)abs(ray.d.x * c255),
@@ -220,9 +221,9 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     Camera camera(cameraLocation, film, focalLength);
 
     const int n        = 12; // triangles
-    Point points[9]   = {{0., 0., -3.},   {1., 0., -3.},   {1., 1., -4.},
-                       {0., 1., -3.},   {-1., 1., -4.}, {-1., 0., -3.},
-                       {-1., -1., -4.}, {0., -1., -3.}, {1., -1., -4.}};
+    Point points[10]   = {{0., 0., -3.},   {1., 0., -3.},  {1., 1., -4.},
+                         {0., 1., -3.},   {-1., 1., -4.}, {-1., 0., -3.},
+                         {-1., -1., -4.}, {0., -1., -3.}, {1., -1., -4.}, {0., 0., -3.5}};
     int vertexes[n*3] = {
         0,1,2,
         0,2,3,
@@ -233,10 +234,10 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
         0,7,8,
         0,8,1,
 
-        0,1,3,
-        0,3,5,
-        0,5,7,
-        0,7,1
+        9,1,3,
+        9,3,5,
+        9,5,7,
+        9,7,1
     };
     Normal normals[n] = {};
     TriangleMesh mesh = {n, points, vertexes, normals};
@@ -246,8 +247,10 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
         for(int y = 0; y < yr; ++y) {
             Ray ray            = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
             const uint8_t c255 = std::numeric_limits<uint8_t>::max();
-            if(mesh.Intersect(ray)) {
-                rgbfr[x][y] = {c255, c255, c255};
+            Intersection ints;
+            if(mesh.Intersect(ray, &ints)) {
+                rgbfr[x][y] = {(uint8_t)abs(ints.n.x * c255), (uint8_t)abs(ints.n.y * c255),
+                               (uint8_t)abs(ints.n.z * c255)};
             } else {
                 rgbfr[x][y] = {(uint8_t)abs(ray.d.x * c255), (uint8_t)abs(ray.d.y * c255),
                                (uint8_t)abs(ray.d.z * c255)};
