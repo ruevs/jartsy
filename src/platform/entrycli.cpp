@@ -6,6 +6,7 @@
 #include "jartsy.h"
 #include "framebuffer/framebuffer.h"
 #include "exportfile/exportpgm.h"
+#include "exportfile/exportpng.h"
 #include "jartsyla.h"
 #include "ray.h"
 #include "film.h"
@@ -26,6 +27,8 @@ Common options:
         with <name> and uses it as output file. For example, when using
         --output %%-2d.ppm for input files f/a.jarts and f/b.jrts, output files
         f/a-2d.ppm and f/b-2d.ppm will be written.
+
+        Supported output image formats are %%.png and %%.ppm.
 
 Commands:
     version
@@ -160,7 +163,11 @@ static bool RunCommand(const std::vector<std::string> args) {
 
             ++homeworkimage;
 
-            PGMWriter::ExportFrameBufferTo(output, rgbfr);
+            if("ppm" == output.Extension()) {
+                PGMWriter::ExportFrameBufferTo(output, rgbfr);
+            } else if("png" == output.Extension()) {
+                PNGWriter::ExportFrameBufferTo(output, rgbfr);
+            }
         };
     } else if(args[1] == "something-else") {
 		// Do something else

@@ -3,6 +3,7 @@ include(GNUInstallDirs)
 # configuration
 
 include_directories(
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -25,6 +26,8 @@ set(jartsy_core
 # jartsy output formats
 
 set(jartsy_export
+    exportfile/exportpng.h
+    exportfile/exportpng.cpp
     exportfile/exportpgm.h
     exportfile/exportpgm.cpp)
 

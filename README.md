@@ -16,9 +16,11 @@ This is "homework" for the [Chaos Camp][chaos] [Ray Tracing Course 2022][rtc].
 ## Example Usage
 
 Render `myscene.jrts` into `myscene.ppm` in 1024x768 resolution.
+Render `myscene.jrts` into `myscene.png` in 1024x768 resolution.
 
 ```sh
-jartsy render -o %.ppm --size 1024x768 myscene.jrts
+jartsy render -o %%.ppm --size 1024x768 myscene.jrts
+jartsy render -o %%.png --size 1024x768 myscene.jrts
 ```
 
 ## Building on Linux
@@ -41,8 +43,7 @@ Before building, check out the project and the necessary submodules:
 ```sh
 git clone https://github.com/ruevs/jartsy
 cd jartsy
-#not needed for now
-#git submodule update --init
+git submodule update --init
 ```
 
 After that, build JARTSy like this:
@@ -75,8 +76,7 @@ Before building, check out the project and the necessary submodules:
 ```sh
 git clone https://github.com/ruevs/jartsy
 cd jartsy
-#not needed for now
-#git submodule update --init
+git submodule update --init
 ```
 
 After that, build JARTSy like this:
@@ -114,8 +114,7 @@ or later is required.
 ```bat
 git clone https://github.com/ruevs/jartsy
 cd jartsy
-#rem not needed for now
-#rem submodule update --init
+rem submodule update --init
 ```
 
 ### Building with Visual Studio IDE
