@@ -27,11 +27,16 @@ public:
         Vector scNDC2Film  = {x, -y, 1};
         Vector scPic2Film  = scPixel2NDC * scNDC2Film;
         // Same as above. I'll delete one when I debug it and am sure I'm not crazy :-)
-        Vector scPix2Film = {x / f.resolution.x, -x / f.resolution.x, 1};
-        Vector trNDC2Film = {-x / 2, y / 2, -fl /*tr.t.z <---- PAR@@@@@@@ Uglyyy hack make the transform class able to muliply transforms!!!!!!*/};
+        Vector scPix2Film = {x / f.resolution.x, -y / f.resolution.y, 1};
+		// The camera points in the -Z direction with the XY plane of a right handed
+		// coordinate system being the "film" plane
+        Vector trNDC2Film = {-x / 2, y / 2, -fl};
         Transform Px2Film = {trNDC2Film, {}, scPix2Film};
 
-        pixel2world = Px2Film;  // PAR@@@@@@@@
+        pixel2world = Px2Film;
+        pixel2world.s = pixel2world.s * tr.s;
+        pixel2world.t += tr.t;
+        pixel2world.r = tr.r;
 
         pclens = tr({});    // The camera center in world coordinates
     }

@@ -114,7 +114,7 @@ class Quaternion {
 public:
     // w + (v.x)*i + (v.y)*j + (v.z)*k
     Vector v;
-    Float w = 1;
+    Float w = 1;    // Make the default quaternion identity {{0, 0, 0}, 1}
 
     inline Quaternion operator-() const { return {-v, -w}; }
     inline Quaternion &operator+=(const Quaternion &q) { v += q.v; w += q.w; return *this; }
@@ -145,6 +145,72 @@ public:
             return *this * (t / m);
         }
     }
+
+    inline Vector RotationU() const {
+        return {w * w + v.x * v.x - v.y * v.y - v.z * v.z,
+                2 * w * v.z + 2 * v.x * v.y,
+                2 * v.x * v.z - 2 * w * v.y};
+    }
+
+    inline Vector RotationV() const {
+        return {2 * v.x * v.y - 2 * w * v.z,
+                w * w - v.x * v.x + v.y * v.y - v.z * v.z,
+                2 * w * v.x + 2 * v.y * v.z};
+    }
+
+    inline Vector RotationN() const {
+        return {2 * w * v.y + 2 * v.x * v.z,
+                2 * v.y * v.z - 2 * w * v.x,
+                w * w - v.x * v.x - v.y * v.y + v.z * v.z};
+    }
+
+    inline Vector operator()(const Vector p) const {
+        // Rotate a vector according to the quaternion
+        // Express the vector in the new basis
+        return RotationU() * p.x + RotationV() * p.y + RotationN() * p.z;
+    }
+
+    static Quaternion From(Vector axis, Float dtheta) {
+        Float c = cos(dtheta / 2), s = sin(dtheta / 2);
+        axis = axis.WithMagnitude(s);
+        return {axis, c};
+    }
+
+    static Quaternion From(Vector u, Vector v) {
+        Vector n = u.Cross(v);
+
+        Quaternion q;
+        double s, tr = 1 + u.x + v.y + n.z;
+        if(tr > 1e-4) {
+            s    = 2 * sqrt(tr);
+            q.w  = s / 4;
+            q.v.x = (v.z - n.y) / s;
+            q.v.y = (n.x - u.z) / s;
+            q.v.z = (u.y - v.x) / s;
+        } else {
+            if(u.x > v.y && u.x > n.z) {
+                s    = 2 * sqrt(1 + u.x - v.y - n.z);
+                q.w  = (v.z - n.y) / s;
+                q.v.x = s / 4;
+                q.v.y = (u.y + v.x) / s;
+                q.v.z = (n.x + u.z) / s;
+            } else if(v.y > n.z) {
+                s    = 2 * sqrt(1 - u.x + v.y - n.z);
+                q.w  = (n.x - u.z) / s;
+                q.v.x = (u.y + v.x) / s;
+                q.v.y = s / 4;
+                q.v.z = (v.z + n.y) / s;
+            } else {
+                s    = 2 * sqrt(1 - u.x - v.y + n.z);
+                q.w  = (u.y - v.x) / s;
+                q.v.x = (n.x + u.z) / s;
+                q.v.y = (v.z + n.y) / s;
+                q.v.z = s / 4;
+            }
+        }
+
+        return q.WithMagnitude(1);
+    }
 };
 
 class Transform {
@@ -155,10 +221,12 @@ public:
     Vector s = {1, 1, 1}; // Scale XYZ
     // Or maybe a 4x4 transformation matrix directly?
 
-    Vector operator()(const Vector &v) const {
-        // PAR@@@@@@ WRITE THIS!!!!! Rotation is missing!!!
-        return v*s+t;
+    inline Vector operator()(const Vector &v) const {
+        // PAR@@@@@@ Sequence of operations?
+        return r(v*s)+t;
     }
+    
+    // PAR@@@ transform multiplication?
 };
 
 
