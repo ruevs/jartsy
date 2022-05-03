@@ -20,6 +20,7 @@ set(jartsy_core
 	ray.h
 	entities.h
 	entities.cpp
+	lights.h
     framebuffer/framebuffer.h
     framebuffer/framebuffer.cpp)
 

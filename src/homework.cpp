@@ -93,7 +93,8 @@ void HW43(void) {
                               {0.56, 1.11, 1.23}, {0.44, -2.368, -0.54}, {-1.56, 0.15, -1.92}};
     const int vertexIndex[nTria*3] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     Normal n[nTria];
-    TriangleMesh trMesh{nTria, p, vertexIndex, n};
+    Material material = {};
+    TriangleMesh trMesh{nTria * 3, nTria, p, nullptr, vertexIndex, n, &material};
 
     // Do not normalize the normals to use half their length as the surface of the triangles in the
     // next step.
@@ -122,9 +123,11 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     Camera camera(cameraLocation, film, focalLength);
 
     Point points[3]   = {{-1.75, -1.75, -3}, {1.75, -1.75, -3}, {0, 1.75, -3}};
+    Normal vertexNormals[3] = {};
     int vertexes[3]   = {0, 1, 2};
     Normal normals[1] = {};
-    TriangleMesh mesh = {1, points, vertexes, normals};
+    Material material = {{}, {}, {}, 0, true};
+    TriangleMesh mesh = {3, 1, points, vertexNormals, vertexes, normals, &material};
     mesh.CalclulateNormals();
 
     for(int x = 0; x < xr; ++x) {
@@ -133,7 +136,7 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
             const uint8_t c255 = std::numeric_limits<uint8_t>::max();
             Intersection ints;
             if(mesh.Intersect(ray, &ints)) {
-                rgbfr[x][y] = {c255, c255, c255};
+                rgbfr[x][y] = {(uint8_t)(ints.uc * c255), (uint8_t)(ints.vc * c255), 0};
             } else {
                 rgbfr[x][y] = {(uint8_t)abs(ray.d.x * c255),
                                (uint8_t)abs(ray.d.y * c255),
@@ -144,24 +147,27 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
 }
 
 void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
-    // Homework 5.2 5.3 5.3 triangle mesh intersection
+    // Homework 5.2 5.3 5.4 triangle mesh intersection
 
     // Size of the camra film/senzor in meters (world scale)
     const Float xs  = 2.;
     const Float ys  = 2.;
     const Film film = {{xr, yr}, (Float)sqrt(Sqr(xs) + Sqr(ys))};
 
+    const Quaternion q             = Quaternion::From({0, 0, 1} , 0.*M_PI/180);
     const Transform cameraLocation = {
-        {.0, .0, .0} /*transaltion*/, {} /*rotation*/, {1., 1., 1.} /*scale*/};
+        {.0, .0, .0} /*transaltion*/, q /*rotation*/, {1., 1., 1.} /*scale*/};
     const Float focalLength = 1;
 
     Camera camera(cameraLocation, film, focalLength);
 
-    const int n        = 12; // triangles
-    Point points[10]   = {{0., 0., -3.},   {1., 0., -3.},  {1., 1., -4.},
+    const int nt       = 12; // triangles
+    const int np       = 10; // points/vertexes
+    Point points[np]   = {{0., 0., -3.},  {1., 0., -3.},  {1., 1., -4.},
                          {0., 1., -3.},   {-1., 1., -4.}, {-1., 0., -3.},
                          {-1., -1., -4.}, {0., -1., -3.}, {1., -1., -4.}, {0., 0., -3.5}};
-    int vertexes[n*3] = {
+    Normal vertexNormals[np] = {};
+    int vertexes[nt * 3] = {
         0,1,2,
         0,2,3,
         0,3,4,
@@ -176,8 +182,9 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
         9,5,7,
         9,7,1
     };
-    Normal normals[n] = {};
-    TriangleMesh mesh = {n, points, vertexes, normals};
+    Normal normals[nt] = {};
+    Material material  = {{}, {}, {}, 0, false};
+    TriangleMesh mesh  = {np, nt, points, vertexNormals, vertexes, normals, &material};
     mesh.CalclulateNormals();
 
     for(int x = 0; x < xr; ++x) {
