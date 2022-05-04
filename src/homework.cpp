@@ -87,11 +87,11 @@ void HW42(void) {
 void HW43(void) {
     // Homework 4. Triangle normals.
     dbp("\n4.3: Triangle normals");
-    const int nTria     = 3;
-    const Point p[nTria*3] = {{-1.75, -1.75, -3},  {1.75, -1.75, -3}, {0, 1.75, -3},
+    const unsigned nTria     = 3;
+    Point p[nTria*3] = {{-1.75, -1.75, -3},  {1.75, -1.75, -3}, {0, 1.75, -3},
                               {0, 0, -1}, {1, 0, 1}, {-1, 0, 1},
                               {0.56, 1.11, 1.23}, {0.44, -2.368, -0.54}, {-1.56, 0.15, -1.92}};
-    const int vertexIndex[nTria*3] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    unsigned vertexIndex[nTria*3] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     Normal n[nTria];
     Material material = {};
     TriangleMesh trMesh{nTria * 3, nTria, p, nullptr, vertexIndex, n, &material};
@@ -124,7 +124,7 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
 
     Point points[3]   = {{-1.75, -1.75, -3}, {1.75, -1.75, -3}, {0, 1.75, -3}};
     Normal vertexNormals[3] = {};
-    int vertexes[3]   = {0, 1, 2};
+    unsigned vertexes[3]   = {0, 1, 2};
     Normal normals[1] = {};
     Material material = {{}, {}, {}, 0, true};
     TriangleMesh mesh = {3, 1, points, vertexNormals, vertexes, normals, &material};
@@ -167,7 +167,7 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
                          {0., 1., -3.},   {-1., 1., -4.}, {-1., 0., -3.},
                          {-1., -1., -4.}, {0., -1., -3.}, {1., -1., -4.}, {0., 0., -3.5}};
     Normal vertexNormals[np] = {};
-    int vertexes[nt * 3] = {
+    unsigned vertexes[nt * 3] = {
         0,1,2,
         0,2,3,
         0,3,4,
@@ -193,6 +193,23 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
             const uint8_t c255 = std::numeric_limits<uint8_t>::max();
             Intersection ints;
             if(mesh.Intersect(ray, &ints)) {
+                rgbfr[x][y] = {(uint8_t)abs(ints.n.x * c255), (uint8_t)abs(ints.n.y * c255),
+                               (uint8_t)abs(ints.n.z * c255)};
+            } else {
+                rgbfr[x][y] = {(uint8_t)abs(ray.d.x * c255), (uint8_t)abs(ray.d.y * c255),
+                               (uint8_t)abs(ray.d.z * c255)};
+            }
+        }
+    }
+}
+
+void Render(const Scene &scene, FrameBuffer<RGBColor> &rgbfr) {
+    for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+        for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+            Ray ray            = scene.camera->GenerateRay({x + (Float)0.5, y + (Float)0.5});
+            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
+            Intersection ints;
+            if(scene.Intersect(ray, &ints)) {
                 rgbfr[x][y] = {(uint8_t)abs(ints.n.x * c255), (uint8_t)abs(ints.n.y * c255),
                                (uint8_t)abs(ints.n.z * c255)};
             } else {

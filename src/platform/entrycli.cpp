@@ -12,6 +12,7 @@
 #include "film.h"
 #include "camera.h"
 #include "entities.h"
+#include "scene.h"
 
 const char *PACKAGE_VERSION = "0.001";
 
@@ -76,7 +77,7 @@ static bool RunCommand(const std::vector<std::string> args) {
         }
     }
 
-    std::function<void(const Platform::Path &)> runner;
+    std::function<void(const Platform::Path &, const Platform::Path &)> runner;
 
     std::vector<Platform::Path> inputFiles;
     auto ParseInputFile = [&](size_t &argn) {
@@ -125,8 +126,8 @@ static bool RunCommand(const std::vector<std::string> args) {
             return false;
         }
 
-        runner = [&](const Platform::Path &output) {
-            // Just stupid hacks to generate the homework images
+        runner = [&](const Platform::Path &input, const Platform::Path &output) {
+/*            // Just stupid hacks to generate the homework images
             // To generate the images run:
             //    jartsy.exe render -o %.ppm --size 1024x768 rectangles circle rays
             static int homeworkimage;
@@ -162,6 +163,21 @@ static bool RunCommand(const std::vector<std::string> args) {
             }
 
             ++homeworkimage;
+*/
+
+
+            Scene scene;
+            ParseCRTSceneFile(input, scene);
+
+            // Pixel resolution of the generated images from the command line
+//            scene.camera->film.resolution.x = width;
+//            scene.camera->film.resolution.y = height;
+
+            FrameBuffer<RGBColor> rgbfr(scene.camera->film.resolution.x,
+                                        scene.camera->film.resolution.y);
+
+            Render(scene, rgbfr);
+
 
             if("ppm" == output.Extension()) {
                 PGMWriter::ExportFrameBufferTo(output, rgbfr);
@@ -214,7 +230,7 @@ static bool RunCommand(const std::vector<std::string> args) {
         }
         JARTSy.AfterNewFile();
 */
-        runner(absOutputFile);
+        runner(absInputFile, absOutputFile);
 /*
         JARTSy.Clear();
 */

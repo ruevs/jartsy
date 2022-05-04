@@ -17,14 +17,14 @@ public:
 
 class TriangleMesh {
 public:
-    int nPoints;
-    int nTri;
+    unsigned nPoints;
+    unsigned nTri;
     // The triangle mesh consists of a point cloud "p". Triangles are descriped with an index "v"
     // into the point cloud listing indexes of the vertexes (v0, v1, v2) of each triangle in order.
     // "n" are the triangle normals for each triangle in the same oreder as the index.
-    const Point *p;
+    Point *p;
     Normal *vn; // Vertex normals for smooth shading - one for each point
-    const int *v;
+    unsigned *v;
     Normal *n;
     Material *material;
     // PAR@@@@@@ Does something else outside manage the memory for the triangle mesh?
