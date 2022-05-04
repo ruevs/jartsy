@@ -127,44 +127,9 @@ static bool RunCommand(const std::vector<std::string> args) {
         }
 
         runner = [&](const Platform::Path &input, const Platform::Path &output) {
-/*            // Just stupid hacks to generate the homework images
-            // To generate the images run:
-            //    jartsy.exe render -o %.ppm --size 1024x768 rectangles circle rays
-            static int homeworkimage;
 
-            fprintf(stderr, "Doing nothing very quickly %i.\n", homeworkimage);
-
-            // Pixel resolution of the generated images from the command line
-            FrameBuffer<RGBColor> rgbfr(width, height);
-
-            if(0 == homeworkimage) {
-                HW21(width, height, rgbfr);
-            }
-
-            if(1 == homeworkimage) {
-                HW22(width, height, rgbfr);
-            }
-
-            if(2 == homeworkimage) {
-                HW30(width, height, rgbfr);
-            }
-
-            if(3 == homeworkimage) {
-                HW42();
-                HW43();
-            }
-
-            if(4 == homeworkimage) {
-                HW51(width, height, rgbfr);
-            }
-
-            if(5 == homeworkimage) {
-                HW5234(width, height, rgbfr);
-            }
-
-            ++homeworkimage;
-*/
-
+            Homework(width, height, output);
+            return;
 
             Scene scene;
             ParseCRTSceneFile(input, scene);

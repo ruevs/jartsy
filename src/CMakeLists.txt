@@ -16,11 +16,14 @@ set(jartsy_core
     jartsy.h
 	util.cpp
 	jartsyla.h
+    film.h
 	camera.h
 	ray.h
+    material.h
 	entities.h
 	entities.cpp
 	lights.h
+    scene.h
     framebuffer/framebuffer.h
     framebuffer/framebuffer.cpp)
 
@@ -31,6 +34,11 @@ set(jartsy_export
     exportfile/exportpng.cpp
     exportfile/exportpgm.h
     exportfile/exportpgm.cpp)
+
+# jartsy input formats
+
+set(jartsy_import
+    nlohman/json.hpp)
 
 # jartsy platform specific files
 
@@ -45,6 +53,7 @@ if(ENABLE_CLI)
     add_executable(jartsy
         ${jartsy_core}
         ${jartsy_export}
+        ${jartsy_import}
         ${jartsy_platform}
         platform/entrycli.cpp)
 
