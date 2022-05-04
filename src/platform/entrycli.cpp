@@ -128,8 +128,10 @@ static bool RunCommand(const std::vector<std::string> args) {
 
         runner = [&](const Platform::Path &input, const Platform::Path &output) {
 
-            Homework(width, height, output);
-            return;
+            if(0 == output.FileName().find("HW")) {
+                Homework(width, height, output);
+                return;
+            }
 
             Scene scene;
             ParseCRTSceneFile(input, scene);
@@ -187,20 +189,11 @@ static bool RunCommand(const std::vector<std::string> args) {
         }
         Platform::Path absOutputFile = outputFile.Expand(/*fromCurrentDirectory=*/true);
 
-/*
-        JARTSy.Init();
-        if(!JARTSy.LoadFromFile(absInputFile)) {
-            fprintf(stderr, "Cannot load '%s'!\n", inputFile.raw.c_str());
-            return false;
-        }
-        JARTSy.AfterNewFile();
-*/
-        runner(absInputFile, absOutputFile);
-/*
-        JARTSy.Clear();
-*/
+        fprintf(stderr, "Rendering '%s'.\n", outputFile.raw.c_str());
 
-        fprintf(stderr, "Written '%s'.\n", outputFile.raw.c_str());
+        runner(absInputFile, absOutputFile);
+
+        fprintf(stderr, "Done.                   \n");
     }
 
     return true;

@@ -211,6 +211,41 @@ public:
 
         return q.WithMagnitude(1);
     }
+
+	// Quaternion from a 3x3 rotation matrix, rows u, v, n
+    static Quaternion From(Vector u, Vector v, Vector n) {
+        Quaternion q;
+        double s, tr = 1 + u.x + v.y + n.z;
+        if(tr > 1e-4) {
+            s     = 2 * sqrt(tr);
+            q.w   = s / 4;
+            q.v.x = (v.z - n.y) / s;
+            q.v.y = (n.x - u.z) / s;
+            q.v.z = (u.y - v.x) / s;
+        } else {
+            if(u.x > v.y && u.x > n.z) {
+                s     = 2 * sqrt(1 + u.x - v.y - n.z);
+                q.w   = (v.z - n.y) / s;
+                q.v.x = s / 4;
+                q.v.y = (u.y + v.x) / s;
+                q.v.z = (n.x + u.z) / s;
+            } else if(v.y > n.z) {
+                s     = 2 * sqrt(1 - u.x + v.y - n.z);
+                q.w   = (n.x - u.z) / s;
+                q.v.x = (u.y + v.x) / s;
+                q.v.y = s / 4;
+                q.v.z = (v.z + n.y) / s;
+            } else {
+                s     = 2 * sqrt(1 - u.x - v.y + n.z);
+                q.w   = (u.y - v.x) / s;
+                q.v.x = (n.x + u.z) / s;
+                q.v.y = (v.z + n.y) / s;
+                q.v.z = s / 4;
+            }
+        }
+
+        return q.WithMagnitude(1);
+    }
 };
 
 class Transform {

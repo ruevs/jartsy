@@ -56,8 +56,28 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
     Film film{{j["settings"]["image_settings"]["width"], j["settings"]["image_settings"]["height"]},
               (Float)sqrt(Sqr(xs) + Sqr(ys))};
 
-    const Float focalLength = 1;
-    Transform cameraLocation = {};  // PAR@@@ Write rotation MATRIX to QUATERNION conversion!
+    const Float focalLength = 1; // PAR@@ crtscene does not have camera focal length.
+    Transform cameraLocation = {{
+                                    j["camera"]["position"][0],
+                                    j["camera"]["position"][1],
+                                    j["camera"]["position"][2],
+                                },
+                                Quaternion::From( // Quaternion from rotation matrix!
+                                    {
+                                        j["camera"]["matrix"][0],
+                                        j["camera"]["matrix"][1],
+                                        j["camera"]["matrix"][2],
+                                    },
+                                    {
+                                        j["camera"]["matrix"][3],
+                                        j["camera"]["matrix"][4],
+                                        j["camera"]["matrix"][5],
+                                    },
+                                    {
+                                        j["camera"]["matrix"][6],
+                                        j["camera"]["matrix"][7],
+                                        j["camera"]["matrix"][8],
+                                    })};
 
     scene.camera = new Camera(cameraLocation, film, focalLength);
 

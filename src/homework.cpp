@@ -251,6 +251,7 @@ void Homework(int width, int height, const Platform::Path &output) {
 
 void Render(const Scene &scene, FrameBuffer<RGBColor> &rgbfr) {
     for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+        fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
         for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
             Ray ray            = scene.camera->GenerateRay({x + (Float)0.5, y + (Float)0.5});
             const uint8_t c255 = std::numeric_limits<uint8_t>::max();
