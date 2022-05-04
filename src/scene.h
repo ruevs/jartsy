@@ -81,37 +81,41 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
 
     scene.camera = new Camera(cameraLocation, film, focalLength);
 
-
-    for(auto &l : j["lights"]) {
-        PointLight light{{
-                             l["position"][0],
-                             l["position"][1],
-                             l["position"][2],
-                         },
-                         l["intensity"],
-                         {1, 1, 1}}; // PAR@@ crtscene does not have coloured lights?!
-        scene.pointLights.push_back(light);
+    if(j.contains("lights")) {
+        for(auto &l : j["lights"]) {
+            PointLight light{{
+                                 l["position"][0],
+                                 l["position"][1],
+                                 l["position"][2],
+                             },
+                             l["intensity"],
+                             {1, 1, 1}}; // PAR@@ crtscene does not have coloured lights?!
+            scene.pointLights.push_back(light);
+        }
     }
 
-
-    for(auto &m : j["materials"]) {
-        Material mat{{},
-                   {
-                       m["albedo"][0],
-                       m["albedo"][1],
-                       m["albedo"][2],
-                   },
-                   {},
-                   0,
-                   m["smooth_shading"]}; // PAR@@@
-        if("diffuse" == m["type"]) {
-            mat.surfaceSmoothness = 0.;
-        } else if("reflective" == m["type"]) {
-            mat.surfaceSmoothness = 1.;
-        } else {
-            mat.surfaceSmoothness = .5;  // PAR
+    if(j.contains("materials")) {
+        for(auto &m : j["materials"]) {
+            Material mat{{},
+                         {
+                             m["albedo"][0],
+                             m["albedo"][1],
+                             m["albedo"][2],
+                         },
+                         {},
+                         0,
+                         m["smooth_shading"]}; // PAR@@@
+            if("diffuse" == m["type"]) {
+                mat.surfaceSmoothness = 0.;
+            } else if("reflective" == m["type"]) {
+                mat.surfaceSmoothness = 1.;
+            } else {
+                mat.surfaceSmoothness = .5; // PAR
+            }
+            scene.materials.push_back(mat);
         }
-        scene.materials.push_back(mat);
+    } else {
+        scene.materials.push_back({});
     }
 
 
@@ -119,7 +123,11 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
         scene.meshes.push_back({});
         TriangleMesh &mesh = scene.meshes.back();
 
-        mesh.material = &scene.materials[m["material_index"]];
+        if(m.contains("material_index")) {
+            mesh.material = &scene.materials[m["material_index"]];
+        } else {
+            mesh.material = &scene.materials[0];
+        }
 
         {
             // Since the xyz coordinates of the points/vertexes in the file are
