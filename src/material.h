@@ -4,7 +4,66 @@
 class Color {
 public:
     Float r, g, b;  // This is stupid. One day it should be a spectral reflectance/transmission/emittance curve
+
+    inline Color operator-() const {
+        return {-r, -g, -b};
+    }
+    inline auto operator[](int i) {
+        switch(i) {
+        case 0: return r;
+        case 1: return g;
+        case 2: return b;
+        default: jartsyassert(false, "Unexpected color element index");
+        }
+    }
+    inline auto &operator+=(const Color &c) {
+        r += c.r;
+        g += c.g;
+        b += c.b;
+        return *this;
+    }
+    inline auto &operator-=(const Color &c) {
+        return *this += -c;
+    }
+    inline auto &operator*=(const Float t) {
+        r *= t;
+        g *= t;
+        b *= t;
+        return *this;
+    }
+    inline auto &operator/=(const Float t) {
+        return *this *= (1 / t);
+    }
+
+    inline bool operator==(const Color &c) const {
+        return r == c.r && g == c.g && b == c.b;
+    }
+    // Should this or the operator== be the exact comparison? Which one will I use more often?
+    inline bool EqualsExactly(const Color &c) const {
+        return r == c.r && g == c.g && b == c.b;
+    };
+
+    inline Color operator+(const Color &c) const {
+        return {r + c.r, g + c.g, b + c.b};
+    }
+    inline Color operator-(const Color &c) const {
+        return {r - c.r, g - c.g, b - c.b};
+    }
+    inline Color operator*(const Float t) const {
+        return {r * t, g * t, b * t};
+    }
+    inline auto operator/(const Float &t) const {
+        return *this * (1 / t);
+    }
+    // The element wize vector multiplication I need ffor the scaling operation
+    inline Color operator*(const Color &c) const {
+        return {r * c.r, g * c.g, b * c.b};
+    }
 };
+
+inline Color operator*(const Float t, const Color &c) {
+    return c * t;
+}
 
 class Material {
 public:
