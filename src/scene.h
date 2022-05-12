@@ -83,13 +83,21 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
 
     if(j.contains("lights")) {
         for(auto &l : j["lights"]) {
+            Color c;
+            if(l.contains("color")) { // PAR@@ crtscene does not have coloured lights?!
+                c.r = l["color"][0];
+                c.g = l["color"][1];
+                c.b = l["color"][2];
+            } else {
+                c = {1., 1., 1.};
+            }
             PointLight light{{
                                  l["position"][0],
                                  l["position"][1],
                                  l["position"][2],
                              },
                              l["intensity"],
-                             {1, 1, 1}}; // PAR@@ crtscene does not have coloured lights?!
+                             c};
             scene.pointLights.push_back(light);
         }
     }
