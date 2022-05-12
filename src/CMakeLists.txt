@@ -57,6 +57,10 @@ if(ENABLE_CLI)
         ${jartsy_platform}
         platform/entrycli.cpp)
 
+if(ENABLE_OPENMP)
+    target_link_libraries(jartsy PRIVATE jartsy_openmp)
+endif()
+
     if(MSVC)
         set_target_properties(jartsy PROPERTIES
             LINK_FLAGS "/INCREMENTAL:NO /OPT:REF")

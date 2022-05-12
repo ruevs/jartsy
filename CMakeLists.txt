@@ -97,13 +97,13 @@ endif()
 if(ENABLE_OPENMP)
     find_package( OpenMP REQUIRED )
     if(OPENMP_FOUND)
-#        add_library(slvs_openmp INTERFACE)
-#        target_compile_options(slvs_openmp INTERFACE ${OpenMP_CXX_FLAGS})
-#        target_link_libraries(slvs_openmp INTERFACE
-#            ${OpenMP_CXX_LIBRARIES})
-#        target_include_directories(slvs_openmp INTERFACE SYSTEM
-#            ${OpenMP_CXX_INCLUDE_DIRS})
-#        message(STATUS "found OpenMP, compiling with flags: " ${OpenMP_CXX_FLAGS} )
+        add_library(jartsy_openmp INTERFACE)
+        target_compile_options(jartsy_openmp INTERFACE ${OpenMP_CXX_FLAGS})
+        target_link_libraries(jartsy_openmp INTERFACE
+            ${OpenMP_CXX_LIBRARIES})
+        target_include_directories(jartsy_openmp INTERFACE SYSTEM
+            ${OpenMP_CXX_INCLUDE_DIRS})
+        message(STATUS "found OpenMP, compiling with flags: " ${OpenMP_CXX_FLAGS} )
     endif()
 endif()
 
