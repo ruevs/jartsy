@@ -51,7 +51,7 @@ public:
     inline auto Dot(const Vector &v) const { return (x * v.x + y * v.y + z * v.z); }
 
     inline auto MagSquared() const { return x * x + y * y + z * z; }
-    inline auto Magnitude() const { return sqrt(x * x + y * y + z * z); }
+    inline auto Magnitude() const { return (Float)sqrt(x * x + y * y + z * z); }
     inline Vector WithMagnitude(Float t) const {
         Float m = Magnitude();
         if(EXACT(0 == m)) {

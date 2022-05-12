@@ -249,20 +249,79 @@ void Homework(int width, int height, const Platform::Path &output) {
     }
 }
 
-void Render(const Scene &scene, FrameBuffer<RGBColor> &rgbfr) {
+void RenderNormals(const Scene &scene, FrameBuffer<Color> &rgbfr) {
     for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
         fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
         for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
             Ray ray            = scene.camera->GenerateRay({x + (Float)0.5, y + (Float)0.5});
-            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
             Intersection ints;
             if(scene.Intersect(ray, &ints)) {
-                rgbfr[x][y] = {(uint8_t)abs(ints.n.x * c255), (uint8_t)abs(ints.n.y * c255),
-                               (uint8_t)abs(ints.n.z * c255)};
+                rgbfr[x][y] = {abs(ints.n.x), abs(ints.n.y), abs(ints.n.z)};
             } else {
-                rgbfr[x][y] = {(uint8_t)abs(ray.d.x * c255), (uint8_t)abs(ray.d.y * c255),
-                               (uint8_t)abs(ray.d.z * c255)};
+                rgbfr[x][y] = {abs(ray.d.x), abs(ray.d.y), abs(ray.d.z)};
             }
         }
     }
 }
+
+Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
+    if(0 < depth) {
+        Intersection ints;
+        if(scene.Intersect(ray, &ints)) {
+            Color color{};
+            for each(auto light in scene.pointLights) {
+                Intersection lightints;
+                Vector lightDir = light.VectorTo(ints.ip /* + ints.n * 0.01*/);
+
+                Ray raytolight{ints.ip, lightDir.WithMagnitude(1), 0.,
+                               10*LENGTH_EPS,
+                               lightDir.Magnitude()};
+                if(scene.Intersect(raytolight, &lightints)) {
+                    // We hit an object PATH tracing ?!?
+                } else {
+                    // return ints.material->reflectance;
+                    auto lambertian = ints.n.Dot(raytolight.d);
+                    if(0 < lambertian) {
+                        color += (light.intensity * light.c * ints.material->reflectance /
+                                 (4 * M_PI * raytolight.tInt *
+                                  raytolight.tInt)); // tInt is the distance to the light
+                    } else {
+                    }
+                }
+            }
+            return color;
+        } else {
+            return scene.settings.bgColor;
+        }
+    } else {
+        return {};  // Darkness at the end of rays :-)
+    }
+}
+
+void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr) {
+    for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+        fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
+#pragma omp parallel for
+        for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+            Ray ray            = scene.camera->GenerateRay({x + (Float)0.5, y + (Float)0.5});
+            Color color = WhittedIntegrate(scene, ray, 10);
+
+/*            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
+
+            rgbfr[x][y] = {(uint8_t)(color.r * c255), (uint8_t)(color.g * c255),
+                           (uint8_t)(color.b * c255)};*/
+            rgbfr[x][y] = color;
+
+        }
+    }
+}
+
+void Render(const Scene &scene, FrameBuffer<Color> &rgbfr) {
+    if((0 == scene.pointLights.size()) && (0 == scene.parallelLights.size())) {
+        // Darkness rules the land. Visualize the underlying maths :-)
+        RenderNormals(scene, rgbfr);
+    } else {
+        RenderWhitted(scene, rgbfr);
+    }
+}
+

@@ -140,16 +140,40 @@ static bool RunCommand(const std::vector<std::string> args) {
 //            scene.camera->film.resolution.x = width;
 //            scene.camera->film.resolution.y = height;
 
-            FrameBuffer<RGBColor> rgbfr(scene.camera->film.resolution.x,
+            FrameBuffer<Color> rgbfr(scene.camera->film.resolution.x,
                                         scene.camera->film.resolution.y);
 
             Render(scene, rgbfr);
 
+            FrameBuffer<RGBColor> fr(scene.camera->film.resolution.x,
+                                     scene.camera->film.resolution.y);
+            
+            // find the peak color value in the whole frame buffer
+            Float cmax = std::numeric_limits<Float>::min();
+            for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+                for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+                    Color c = rgbfr[x][y];
+                    if(c.r > cmax) { cmax = c.r; }
+                    if(c.g > cmax) { cmax = c.g; }
+                    if(c.b > cmax) { cmax = c.b; }
+                }
+            }
+
+            // Rescale to 8 bit RGB for output
+            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
+            for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+                for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+                    fr[x][y] = {(uint8_t)(rgbfr[x][y].r * c255 / cmax),
+                                (uint8_t)(rgbfr[x][y].g * c255 / cmax),
+                                (uint8_t)(rgbfr[x][y].b * c255 / cmax)};
+                }
+            }
+
 
             if("ppm" == output.Extension()) {
-                PGMWriter::ExportFrameBufferTo(output, rgbfr);
+                PGMWriter::ExportFrameBufferTo(output, fr);
             } else if("png" == output.Extension()) {
-                PNGWriter::ExportFrameBufferTo(output, rgbfr);
+                PNGWriter::ExportFrameBufferTo(output, fr);
             }
         };
     } else if(args[1] == "something-else") {
