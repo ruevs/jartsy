@@ -299,9 +299,10 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
 }
 
 void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr) {
-    for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
-        fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
 #pragma omp parallel for
+    for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+        // The progress indicator is crazy with OpenMP but I'll not waste time on synchronization.
+        fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
         for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
             Ray ray            = scene.camera->GenerateRay({x + (Float)0.5, y + (Float)0.5});
             Color color = WhittedIntegrate(scene, ray, 10);

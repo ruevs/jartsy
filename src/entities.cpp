@@ -36,14 +36,14 @@ void TriangleMesh::CalclulateNormals(bool normalize) {
 inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri, Intersection *ints) const {
     const Float rnProj = r.d.Dot(n[tri]);
     if(0 > rnProj) { // Triangle plane and ray are not parallel, ray is "outside"
-        const Vector vr[3] = {p[v[3 * tri]], p[v[3 * tri + 1]], p[v[3 * tri + 2]]};
-        const Float rpDist = n[tri].Dot(vr[0] - r.o);
+#define vr(i) (p[v[3 * tri + (i)]])     // Ugly profiling guided optimization. Saves about 10%.
+        const Float rpDist = n[tri].Dot(vr(0) - r.o);
         if(0 > rpDist) {    // The ray is pointing to the plane (not away from it)
             const Float rt = rpDist / rnProj;
-            const Point p  = r.o + rt * r.d; // Ray-plane intersection point
+            const Point ip  = r.o + rt * r.d; // Ray-plane intersection point
             for(int i = 0; i < 3; ++i) {
                 // Positive means p "on the left of" vr[i]
-                if(0 > n[tri].Dot((vr[(i + 1) % 3] - vr[i]).Cross(p - vr[i]))) {
+                if(0 > n[tri].Dot((vr((i + 1) % 3) - vr(i)).Cross(ip - vr(i)))) {
                     return false;
                 }
             }
@@ -51,12 +51,12 @@ inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri, Intersection *ints)
                 r.tInt = rt; // Remember the intersection distance if it is the closest
                 // PAR@@@@ Here we should fill in some structure that describes the
                 // intersection - which entity, from which side etc...
-                ints->ip = p;
+                ints->ip = ip;
                 if(material->smoothShading) {
                     // Calculate and interpolated normal based on the vertex normals.
-                    Float triArea = (vr[1] - vr[0]).Cross(vr[2] - vr[0]).Magnitude();
-                    Float uc      = (p - vr[0]).Cross(vr[2] - vr[0]).Magnitude() / triArea;
-                    Float vc      = (vr[1] - vr[0]).Cross(p - vr[0]).Magnitude() / triArea;
+                    Float triArea = (vr(1) - vr(0)).Cross(vr(2) - vr(0)).Magnitude();
+                    Float uc      = (ip - vr(0)).Cross(vr(2) - vr(0)).Magnitude() / triArea;
+                    Float vc      = (vr(1) - vr(0)).Cross(ip - vr(0)).Magnitude() / triArea;
 
                     ints->uc = uc;
                     ints->vc = vc;
