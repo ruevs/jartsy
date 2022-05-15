@@ -313,10 +313,11 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
 
 void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr, const int raysperpixel) {
     std::srand(std::time(nullptr));
+    std::atomic_int progress = 0;
 #pragma omp parallel for
     for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
-        // The progress indicator is crazy with OpenMP but I'll not waste time on synchronization.
-        fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
+        int p = progress++;
+        fprintf(stderr, "x = %5d %5.2f%%\r", p, 100. * (p + 1) / scene.camera->film.resolution.x);
         for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
             Color color{};
             for(int aa = 0; aa < raysperpixel; ++aa) {
