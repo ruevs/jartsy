@@ -113,10 +113,11 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
                          {},
                          0,
                          m["smooth_shading"]}; // PAR@@@
+            const Float PARFudgeFactor = 0.0;   // Just for fun :-) PAR@@@@
             if("diffuse" == m["type"]) {
-                mat.surfaceSmoothness = 0.;
+                mat.surfaceSmoothness = 0. + PARFudgeFactor;
             } else if("reflective" == m["type"]) {
-                mat.surfaceSmoothness = 1.;
+                mat.surfaceSmoothness = 1. - PARFudgeFactor;
             } else {
                 mat.surfaceSmoothness = .5; // PAR
             }

@@ -269,28 +269,38 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
         Intersection ints;
         if(scene.Intersect(ray, &ints)) {
             Color color{};
-            for each(auto light in scene.pointLights) {
-                Intersection lightints;
-                // It seems to me that the "shadowBias" suggested in lecture 8 is better served by a
-                // non-zero ray minimum time - see raytolight below.
-                Vector lightDir = light.VectorTo(ints.ip /* + ints.n * 0.01*/);
+            if(1 > ints.material->surfaceSmoothness) {
+                // The surface is at least a bit diffuse. Do Lambertian lighting.
+                for each(auto light in scene.pointLights) {
+                    Intersection lightints;
+                    // It seems to me that the "shadowBias" suggested in lecture 8 is better served
+                    // by a non-zero ray minimum time - see raytolight below.
+                    Vector lightDir = light.VectorTo(ints.ip /* + ints.n * 0.01*/);
 
-                Ray raytolight{ints.ip, lightDir.WithMagnitude(1), 0.,
-                               10*LENGTH_EPS,
-                               lightDir.Magnitude()};
-                if(scene.Intersect(raytolight, &lightints)) {
-                    // We hit an object PATH tracing ?!?
-                } else {
-                    // return ints.material->reflectance;
-                    auto lambertian = ints.n.Dot(raytolight.d);
-                    if(0 < lambertian) {
-                        // tInt is the distance to the light
-                        color += lambertian * light.intensity * light.c *
-                                 ints.material->reflectance /
-                                 (4 * M_PI * raytolight.tInt * raytolight.tInt);
+                    Ray raytolight{ints.ip, lightDir.WithMagnitude(1), 0., 10 * LENGTH_EPS,
+                                   lightDir.Magnitude()};
+                    if(scene.Intersect(raytolight, &lightints)) {
+                        // We hit an object PATH tracing ?!?
                     } else {
+                        auto lambertian = ints.n.Dot(raytolight.d);
+                        if(0 < lambertian) {
+                            // tInt is the distance to the light
+                            color += (1 - ints.material->surfaceSmoothness) * lambertian *
+                                     light.intensity * light.c * ints.material->reflectance /
+                                     (4 * M_PI * raytolight.tInt * raytolight.tInt);
+                        } else {
+                        }
                     }
                 }
+            }
+
+            if(0 < ints.material->surfaceSmoothness && 1 < depth) {
+                // The surface is at least a bit reflective. Generate a reflectance ray and
+                // trace it.
+                const Ray reflectedRay{ints.ip, ray.d - 2 * ray.d.Dot(ints.n) * ints.n, 0.,
+                                       10 * LENGTH_EPS};
+                color += ints.material->surfaceSmoothness * ints.material->reflectance *
+                         WhittedIntegrate(scene, reflectedRay, --depth);
             }
             return color;
         } else {
@@ -301,21 +311,20 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
     }
 }
 
-void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr) {
+void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr, const int raysperpixel) {
+    std::srand(std::time(nullptr));
 #pragma omp parallel for
     for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
         // The progress indicator is crazy with OpenMP but I'll not waste time on synchronization.
         fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
         for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
-            Ray ray            = scene.camera->GenerateRay({x + (Float)0.5, y + (Float)0.5});
-            Color color = WhittedIntegrate(scene, ray, 10);
-
-/*            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
-
-            rgbfr[x][y] = {(uint8_t)(color.r * c255), (uint8_t)(color.g * c255),
-                           (uint8_t)(color.b * c255)};*/
-            rgbfr[x][y] = color;
-
+            Color color{};
+            for(int aa = 0; aa < raysperpixel; ++aa) {
+                Ray ray = scene.camera->GenerateRay({x + (Float)std::rand() / RAND_MAX,
+                                                     y + (Float)std::rand() / RAND_MAX});
+                color += WhittedIntegrate(scene, ray, 5);
+            }
+            rgbfr[x][y] = color / raysperpixel;
         }
     }
 }
@@ -325,7 +334,7 @@ void Render(const Scene &scene, FrameBuffer<Color> &rgbfr) {
         // Darkness rules the land. Visualize the underlying maths :-)
         RenderNormals(scene, rgbfr);
     } else {
-        RenderWhitted(scene, rgbfr);
+        RenderWhitted(scene, rgbfr, 4);
     }
 }
 
