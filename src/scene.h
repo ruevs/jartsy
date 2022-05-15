@@ -124,7 +124,7 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
             scene.materials.push_back(mat);
         }
     } else {
-        scene.materials.push_back({});
+        scene.materials.push_back({{}, {0.5, 0.5, 0.5}});
     }
 
 
