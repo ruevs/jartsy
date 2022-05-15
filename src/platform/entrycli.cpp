@@ -160,12 +160,14 @@ static bool RunCommand(const std::vector<std::string> args) {
             }
 
             // Rescale to 8 bit RGB for output
+            const Float gamma  = 1/2.2; // 2.2 is the standard sRGB gamma
+            cmax = pow(cmax, gamma);
             const uint8_t c255 = std::numeric_limits<uint8_t>::max();
             for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
                 for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
-                    fr[x][y] = {(uint8_t)(rgbfr[x][y].r * c255 / cmax),
-                                (uint8_t)(rgbfr[x][y].g * c255 / cmax),
-                                (uint8_t)(rgbfr[x][y].b * c255 / cmax)};
+                    fr[x][y] = {(uint8_t)(pow(rgbfr[x][y].r, gamma) * c255 / cmax),
+                                (uint8_t)(pow(rgbfr[x][y].g, gamma) * c255 / cmax),
+                                (uint8_t)(pow(rgbfr[x][y].b, gamma) * c255 / cmax)};
                 }
             }
 
