@@ -271,6 +271,8 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
             Color color{};
             for each(auto light in scene.pointLights) {
                 Intersection lightints;
+                // It seems to me that the "shadowBias" suggested in lecture 8 is better served by a
+                // non-zero ray minimum time - see raytolight below.
                 Vector lightDir = light.VectorTo(ints.ip /* + ints.n * 0.01*/);
 
                 Ray raytolight{ints.ip, lightDir.WithMagnitude(1), 0.,
@@ -282,9 +284,10 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
                     // return ints.material->reflectance;
                     auto lambertian = ints.n.Dot(raytolight.d);
                     if(0 < lambertian) {
-                        color += (light.intensity * light.c * ints.material->reflectance /
-                                 (4 * M_PI * raytolight.tInt *
-                                  raytolight.tInt)); // tInt is the distance to the light
+                        // tInt is the distance to the light
+                        color += lambertian * light.intensity * light.c *
+                                 ints.material->reflectance /
+                                 (4 * M_PI * raytolight.tInt * raytolight.tInt);
                     } else {
                     }
                 }
