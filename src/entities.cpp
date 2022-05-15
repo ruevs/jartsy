@@ -40,16 +40,18 @@ inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri, Intersection *ints)
         const Float rpDist = n[tri].Dot(vr(0) - r.o);
         if(0 > rpDist) {    // The ray is pointing to the plane (not away from it)
             const Float rt = rpDist / rnProj;
-            const Point ip  = r.o + rt * r.d; // Ray-plane intersection point
-            for(int i = 0; i < 3; ++i) {
-                // Positive means p "on the left of" vr[i]
-                if(0 > n[tri].Dot((vr((i + 1) % 3) - vr(i)).Cross(ip - vr(i)))) {
-                    return false;
-                }
-            }
+            // The potential intersection distance known at this point so calculate
+            // the intersection only if it will be the closest on the ray.
             if((rt < r.tInt) && (rt > r.mintInt)) {
-                r.tInt = rt; // Remember the intersection distance if it is the closest
-                // PAR@@@@ Here we should fill in some structure that describes the
+                const Point ip = r.o + rt * r.d; // Ray-plane intersection point
+                for(int i = 0; i < 3; ++i) {
+                    // Positive means p "on the left of" vr[i]
+                    if(0 > n[tri].Dot((vr((i + 1) % 3) - vr(i)).Cross(ip - vr(i)))) {
+                        return false;
+                    }
+                }
+                r.tInt = rt; // Remember the intersection distance
+                // PAR@@@@ Here we fill in a structure that describes the
                 // intersection - which entity, from which side etc...
                 ints->ip = ip;
                 if(material->smoothShading) {
