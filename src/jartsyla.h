@@ -132,7 +132,7 @@ public:
     inline auto operator/(const Float &t) const { return *this * (1 / t); }
 
     inline auto MagSquared() const { return v.MagSquared() + w * w; }
-    inline auto Magnitude() const { return sqrt(v.Magnitude() + w * w); }
+    inline auto Magnitude() const { return sqrt(MagSquared()); }
     inline Quaternion WithMagnitude(Float t) const {
         Float m = Magnitude();
         if(EXACT(0 == m)) {
@@ -258,7 +258,7 @@ public:
 
     inline Vector operator()(const Vector &v) const {
         // PAR@@@@@@ Sequence of operations?
-        return r(v*s)+t;
+        return r(v*s+t);
     }
     
     // PAR@@@ transform multiplication?
