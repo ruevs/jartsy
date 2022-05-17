@@ -83,3 +83,36 @@ bool TriangleMesh::Intersect(Ray &r, Intersection *ints) const {
     }
     return ret;
 }
+
+bool Sphere::Intersect(Ray &r, Intersection *ints) const {
+    bool ret                = false;
+    const Vector oc         = r.o - center;
+    const auto a            = r.d.MagSquared();
+    const auto half_b       = oc.Dot(r.d);
+    const auto c            = oc.MagSquared() - radius * radius;
+    const auto discriminant = half_b * half_b - a * c;
+
+    if(discriminant < 0)
+        return false;
+
+    const auto sqrtd = sqrt(discriminant);
+
+    // Check if one of the roots is the closest intersection
+    auto root = (-half_b - sqrtd) / a;
+    if(root < r.mintInt || r.tInt < root) {
+        root = (-half_b + sqrtd) / a;
+        if(root < r.mintInt || r.tInt < root)
+            return false;
+    }
+
+    r.tInt         = root;
+    ints->ip       = r.o + r.d * r.tInt;
+    ints->n        = (ints->ip - center) / radius;
+    ints->material = material;
+    // PAR@@@ these a meaningless until I assign a transformation to the sphere.
+    // but they will be needed for texture mapping
+    //    ints->uc = uc;
+    //    ints->vc = vc;
+
+    return true;
+}

@@ -37,4 +37,13 @@ private:
     inline bool IntersectTriangle(Ray &r, int tri, Intersection *ints) const;
 };
 
+class Sphere {
+public:
+    Point center;
+    Float radius;
+    Material *material;
+
+    bool Intersect(Ray &r, Intersection *ints) const;
+};
+
 #endif

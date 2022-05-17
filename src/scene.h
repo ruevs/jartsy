@@ -23,6 +23,7 @@ public:
     Camera *camera;
 
     std::vector<TriangleMesh> meshes;
+    std::vector<Sphere> spheres;
     std::vector<Material> materials;
 
     std::vector<PointLight> pointLights;
@@ -34,6 +35,9 @@ public:
         bool ret = false;
         for each(auto mesh in meshes) {
             ret |= mesh.Intersect(r, ints);
+        }
+        for each(auto sphere in spheres) {
+            ret |= sphere.Intersect(r, ints);
         }
         return ret;
     };
@@ -199,6 +203,12 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
             mesh.n = new Normal[mesh.nTri];
             mesh.CalclulateNormals();
         }
+    }
+
+    for(auto &m : j["spheres"]) {
+        scene.spheres.push_back({{m["center"][0], m["center"][1], m["center"][2]},
+                                 m["radius"],
+                                 &scene.materials[m["material_index"]]});
     }
 }
 
