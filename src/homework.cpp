@@ -133,7 +133,7 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     for(int x = 0; x < xr; ++x) {
         for(int y = 0; y < yr; ++y) {
             Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
-            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
+            constexpr uint8_t c255 = std::numeric_limits<uint8_t>::max();
             Intersection ints;
             if(mesh.Intersect(ray, &ints)) {
                 rgbfr[x][y] = {(uint8_t)(ints.uc * c255), (uint8_t)(ints.vc * c255), 0};
@@ -190,7 +190,7 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     for(int x = 0; x < xr; ++x) {
         for(int y = 0; y < yr; ++y) {
             Ray ray            = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
-            const uint8_t c255 = std::numeric_limits<uint8_t>::max();
+            constexpr uint8_t c255 = std::numeric_limits<uint8_t>::max();
             Intersection ints;
             if(mesh.Intersect(ray, &ints)) {
                 rgbfr[x][y] = {(uint8_t)abs(ints.n.x * c255), (uint8_t)abs(ints.n.y * c255),
@@ -271,7 +271,7 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
             Color color{};
             if(1 > ints.material->surfaceSmoothness) {
                 // The surface is at least a bit diffuse. Do Lambertian lighting.
-                for each(auto light in scene.pointLights) {
+                for each(const auto &light in scene.pointLights) {
                     Intersection lightints;
                     // It seems to me that the "shadowBias" suggested in lecture 8 is better served
                     // by a non-zero ray minimum time - see raytolight below.

@@ -33,10 +33,10 @@ public:
 
     inline bool Intersect(Ray &r, Intersection *ints) const {
         bool ret = false;
-        for each(auto mesh in meshes) {
+        for each(const auto &mesh in meshes) {
             ret |= mesh.Intersect(r, ints);
         }
-        for each(auto sphere in spheres) {
+        for each(const auto &sphere in spheres) {
             ret |= sphere.Intersect(r, ints);
         }
         return ret;
