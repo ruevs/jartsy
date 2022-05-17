@@ -51,12 +51,22 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
     scene.settings.bgColor.b = j["settings"]["background_color"][2];
 
 
-    const Float xs = 2.;
-    const Float ys = 2.;
-    Film film{{j["settings"]["image_settings"]["width"], j["settings"]["image_settings"]["height"]},
-              (Float)sqrt(Sqr(xs) + Sqr(ys))};
+    const Float xs = 4.;
+    const Float ys = 4.;
+    Float diag     = (Float)sqrt(Sqr(xs) + Sqr(ys));
 
-    const Float focalLength = 1; // PAR@@ crtscene does not have camera focal length.
+    if(j["camera"].contains("filmdiagonal")) {
+        diag = j["camera"]["filmdiagonal"];
+    }
+
+    Film film{{j["settings"]["image_settings"]["width"], j["settings"]["image_settings"]["height"]},
+              diag};
+
+    Float focalLength = 1; // PAR@@ crtscene does not have camera focal length.
+    if(j["camera"].contains("focallength")) {
+        focalLength = j["camera"]["focallength"];
+    }
+
     Transform cameraLocation = {{
                                     j["camera"]["position"][0],
                                     j["camera"]["position"][1],
@@ -118,6 +128,18 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
                 mat.surfaceSmoothness = 0. + PARFudgeFactor;
             } else if("reflective" == m["type"]) {
                 mat.surfaceSmoothness = 1. - PARFudgeFactor;
+            } else if("advanced" == m["type"]) {
+                mat.indexOfRefraction = {
+                    m["refraction"][0],
+                    m["refraction"][1],
+                    m["refraction"][2],
+                };
+                mat.transmission = {
+                    m["transmission"][0],
+                    m["transmission"][1],
+                    m["transmission"][2],
+                };
+                mat.surfaceSmoothness = m["smoothness"];
             } else {
                 mat.surfaceSmoothness = .5; // PAR
             }
