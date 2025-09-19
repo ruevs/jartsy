@@ -55,7 +55,7 @@ public:
     inline auto operator/(const Float &t) const {
         return *this * (1 / t);
     }
-    // The element wize vector multiplication I need ffor the scaling operation
+    // The element wize vector multiplication I need for the scaling operation
     inline Color operator*(const Color &c) const {
         return {r * c.r, g * c.g, b * c.b};
     }

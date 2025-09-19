@@ -33,10 +33,10 @@ public:
 
     inline bool Intersect(Ray &r, Intersection *ints) const {
         bool ret = false;
-        for each(const auto &mesh in meshes) {
+        for(const auto &mesh : meshes) {
             ret |= mesh.Intersect(r, ints);
         }
-        for each(const auto &sphere in spheres) {
+        for(const auto &sphere : spheres) {
             ret |= sphere.Intersect(r, ints);
         }
         return ret;
@@ -46,9 +46,9 @@ public:
 // This is awfull :-)
 void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
     using json = nlohmann::json;
-    std::ifstream i(input.raw);
+    std::ifstream is(input.raw);
     json j;
-    i >> j;
+    is >> j;
 
     scene.settings.bgColor.r = j["settings"]["background_color"][0];
     scene.settings.bgColor.g = j["settings"]["background_color"][1];
@@ -172,7 +172,7 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
             jartsyassert(0 == tmp.size() % 3,
                          "Vertex array in input file is not divisible by three!");
 
-            mesh.nPoints = tmp.size() / 3;
+            mesh.nPoints = (unsigned)tmp.size() / 3;
 
             // ...allocate point storage...
             mesh.p = new Point[mesh.nPoints];
@@ -198,7 +198,7 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
             
             mesh.v = new unsigned[tmp.size()]; // Yes, flat vertex index array - three per triangle.
             std::copy(tmp.begin(), tmp.end(), mesh.v);
-            mesh.nTri = tmp.size() / 3;
+            mesh.nTri = (unsigned)tmp.size() / 3;
 
             mesh.n = new Normal[mesh.nTri];
             mesh.CalclulateNormals();

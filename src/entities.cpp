@@ -1,12 +1,12 @@
 #include "entities.h"
 
 void TriangleMesh::CalclulateNormals(bool normalize) {
-    jartsyassert(p, "is a NULL pointer in a triangle mesh entity");
-    jartsyassert(v, "is a NULL pointer in a triangle mesh entity");
-    jartsyassert(n, "is a NULL pointer in a triangle mesh entity");
-    jartsyassert(material, "is a NULL pointer in a triangle mesh entity");
+    jartsyassert((nullptr!=p), "is a NULL pointer in a triangle mesh entity");
+    jartsyassert((nullptr != v), "is a NULL pointer in a triangle mesh entity");
+    jartsyassert((nullptr != n), "is a NULL pointer in a triangle mesh entity");
+    jartsyassert((nullptr != material), "is a NULL pointer in a triangle mesh entity");
 
-    for(int i = 0; i < nTri; ++i) {
+    for(unsigned i = 0; i < nTri; ++i) {
         // e0 = v1 - v0; e1 = v2 - v0; n = cross(e0, e1)
         Vector e0 = p[v[3 * i + 1]] - p[v[3 * i]];
         if(normalize) {
@@ -18,11 +18,11 @@ void TriangleMesh::CalclulateNormals(bool normalize) {
 
     if(true == material->smoothShading) {
         // Calculate vertex normals
-        jartsyassert(vn, "is a NULL pointer in a triangle mesh entity");
+        jartsyassert((nullptr != vn), "is a NULL pointer in a triangle mesh entity");
 
-        for(int vert = 0; vert < nPoints; ++vert) {
+        for(unsigned vert = 0; vert < nPoints; ++vert) {
             Vector triangleNormaSum{};
-            for(int tri = 0; tri < nTri; ++tri) {
+            for(unsigned tri = 0; tri < nTri; ++tri) {
                 if((vert == v[3 * tri]) || (vert == v[3 * tri + 1]) || (vert == v[3 * tri + 2])) {
                     // The vertex is pat of the triangle. Add the triangle normal to the average
                     triangleNormaSum += n[tri];
@@ -33,7 +33,7 @@ void TriangleMesh::CalclulateNormals(bool normalize) {
     }
 }
 
-inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri, Intersection *ints) const {
+inline bool TriangleMesh::IntersectTriangle(Ray &r, unsigned tri, Intersection *ints) const {
     const Float rnProj = r.d.Dot(n[tri]);
     if(0 > rnProj) { // Triangle plane and ray are not parallel, ray is "outside"
 #define vr(i) (p[v[3 * tri + (i)]])     // Ugly profiling guided optimization. Saves about 10%.
@@ -78,14 +78,13 @@ inline bool TriangleMesh::IntersectTriangle(Ray &r, int tri, Intersection *ints)
 
 bool TriangleMesh::Intersect(Ray &r, Intersection *ints) const {
     bool ret = false;
-    for(int i = 0; i < nTri; ++i) {
+    for(unsigned i = 0; i < nTri; ++i) {
         ret |= IntersectTriangle(r, i, ints);
     }
     return ret;
 }
 
 bool Sphere::Intersect(Ray &r, Intersection *ints) const {
-    bool ret                = false;
     const Vector oc         = r.o - center;
     const auto a            = r.d.MagSquared();
     const auto half_b       = oc.Dot(r.d);
@@ -109,7 +108,7 @@ bool Sphere::Intersect(Ray &r, Intersection *ints) const {
     ints->ip       = r.o + r.d * r.tInt;
     ints->n        = (ints->ip - center) / radius;
     ints->material = material;
-    // PAR@@@ these a meaningless until I assign a transformation to the sphere.
+    // PAR@@@ these are meaningless until I assign a transformation to the sphere.
     // but they will be needed for texture mapping
     //    ints->uc = uc;
     //    ints->vc = vc;

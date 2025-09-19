@@ -44,10 +44,12 @@ public:
     Color c;
 
     inline Vector VectorTo(const Point &from) const {
+        (void)from; // unused
         return -direction;
     };
     bool Intersect(Ray &r, Intersection *ints) const {
-
+        // PAR@@@@@@ Implement this!!!!
+        // PAR@@@@@@ how should I fill ints->ip
         return true;
     };
 };

@@ -10,12 +10,12 @@ void PGMWriter::ExportFrameBufferTo(const Platform::Path &filename, FrameBuffer<
         return;
     }
 
-    const char *PGMHeader = "P3\n";
+    constexpr char PGMHeader[] = "P3\n";
     fprintf(f, PGMHeader);
-    fprintf(f, "%zu %zu\n", fb.rx, fb.ry);    // Resolution
+    fprintf(f, "%u %u\n", fb.rx, fb.ry);    // Resolution
     fprintf(f, "%u\n", std::numeric_limits<uint8_t>::max()); // sub-pixel color gepth
-    for(size_t y = 0; y < fb.ry; ++y) {
-        for(size_t x = 0; x < fb.rx; ++x) {
+    for(unsigned y = 0; y < fb.ry; ++y) {
+        for(unsigned x = 0; x < fb.rx; ++x) {
             fprintf(f, "%u\t%u\t%u\t", fb[x][y].red, fb[x][y].green, fb[x][y].blue); // One pixel
         }
         fprintf(f, "\n");

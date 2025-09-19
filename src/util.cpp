@@ -24,13 +24,13 @@ std::string JARTSy::jartsyprintf(const char *fmt, ...) {
     va_end(va);
 
     std::string result;
-    result.resize(size + 1);
+    result.resize((size_t)size + 1u);
 
     va_start(va, fmt);
-    vsnprintf(&result[0], size + 1, fmt, va);
+    vsnprintf(&result[0], size + 1u, fmt, va);
     va_end(va);
 
-    result.resize(size);
+    result.resize((size_t)size);
     return result;
 }
 

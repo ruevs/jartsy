@@ -5,7 +5,7 @@
 
 class Ray {
 public:
-    Point o;      // Origin (really a point but who cares)
+    Point o;      // Origin
     Vector d;     // Direction
     Float t=0;    // Scene time of the ray
     Float mintInt = 0; // Minimum "Time" along the ray for intersection (e.g. avoid close to camera).

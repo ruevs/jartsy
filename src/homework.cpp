@@ -1,38 +1,38 @@
-void HW21(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+void HW21(unsigned xr, unsigned yr, FrameBuffer<RGBColor> &rgbfr) {
     // Homework 2 part 1 rectangles
 
     // numbrer of rectangles in X and Y direction
-    const size_t nxrect = 4;
-    const size_t nyrect = 4;
+    const unsigned nxrect = 4;
+    const unsigned nyrect = 4;
     // rectangle size ceil (rounded up)
-    const size_t xrect = (xr + nxrect - 1) / nxrect;
-    const size_t yrect = (yr + nyrect - 1) / nyrect;
+    const unsigned xrect = (xr + nxrect - 1) / nxrect;
+    const unsigned yrect = (yr + nyrect - 1) / nyrect;
     RGBColor pix{0, 0, 0};
-    for(int x = 0; x < xr; ++x) {
+    for(unsigned x = 0; x < xr; ++x) {
         if(0 == (x % xrect)) {
             pix.red += std::numeric_limits<uint8_t>::max() / nxrect;
         }
         pix.green = 0;
-        for(int y = 0; y < yr; ++y) {
+        for(unsigned y = 0; y < yr; ++y) {
             if(0 == (y % yrect)) {
                 pix.green += std::numeric_limits<uint8_t>::max() / nyrect;
             }
-            pix.blue = (std::numeric_limits<uint8_t>::max() * rand()) / RAND_MAX; // blue is random
+            pix.blue = (uint8_t)(((int)std::numeric_limits<uint8_t>::max() * rand()) / RAND_MAX); // blue is random
             rgbfr[x][y] = pix;
         }
     }
 }
 
-void HW22(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+void HW22(unsigned xr, unsigned yr, FrameBuffer<RGBColor> &rgbfr) {
     // Homework 2 part 2 circle
 
     // coordinates of the center of the circle
-    const size_t xc = xr / 2;
-    const size_t yc = yr / 2;
+    const unsigned xc = xr / 2;
+    const unsigned yc = yr / 2;
     // radius suqared
-    const size_t rsq = min(xr, yr) * min(xr, yr) / (4 * 4);
-    for(int x = 0; x < xr; ++x) {
-        for(int y = 0; y < yr; ++y) {
+    const unsigned rsq = min(xr, yr) * min(xr, yr) / (4 * 4);
+    for(unsigned x = 0; x < xr; ++x) {
+        for(unsigned y = 0; y < yr; ++y) {
             if((x - xc) * (x - xc) + (y - yc) * (y - yc) < rsq) {
                 // we are in the circle
                 rgbfr[x][y] = {57, 119, 34}; // circle color from my screen shot.
@@ -44,7 +44,7 @@ void HW22(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     }
 }
 
-void HW30(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+void HW30(unsigned xr, unsigned yr, FrameBuffer<RGBColor> &rgbfr) {
     // Homework 3 rays
 
     // Size of the camra film/senzor in meters (world scale)
@@ -58,8 +58,8 @@ void HW30(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
 
     Camera camera(cameraLocation, film, focalLength);
 
-    for(int x = 0; x < xr; ++x) {
-        for(int y = 0; y < yr; ++y) {
+    for(unsigned x = 0; x < xr; ++x) {
+        for(unsigned y = 0; y < yr; ++y) {
             Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
             rgbfr[x][y] = {(uint8_t)abs(ray.d.x * std::numeric_limits<uint8_t>::max()),
                            (uint8_t)abs(ray.d.y * std::numeric_limits<uint8_t>::max()),
@@ -108,7 +108,7 @@ void HW43(void) {
     }
 }
 
-void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+void HW51(unsigned xr, unsigned yr, FrameBuffer<RGBColor> &rgbfr) {
     // Homework 5.1 triangle intersection
 
     // Size of the camra film/senzor in meters (world scale)
@@ -130,8 +130,8 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     TriangleMesh mesh = {3, 1, points, vertexNormals, vertexes, normals, &material};
     mesh.CalclulateNormals();
 
-    for(int x = 0; x < xr; ++x) {
-        for(int y = 0; y < yr; ++y) {
+    for(unsigned x = 0; x < xr; ++x) {
+        for(unsigned y = 0; y < yr; ++y) {
             Ray ray     = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
             constexpr uint8_t c255 = std::numeric_limits<uint8_t>::max();
             Intersection ints;
@@ -146,7 +146,7 @@ void HW51(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     }
 }
 
-void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
+void HW5234(unsigned xr, unsigned yr, FrameBuffer<RGBColor> &rgbfr) {
     // Homework 5.2 5.3 5.4 triangle mesh intersection
 
     // Size of the camra film/senzor in meters (world scale)
@@ -187,8 +187,8 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     TriangleMesh mesh  = {np, nt, points, vertexNormals, vertexes, normals, &material};
     mesh.CalclulateNormals();
 
-    for(int x = 0; x < xr; ++x) {
-        for(int y = 0; y < yr; ++y) {
+    for(unsigned x = 0; x < xr; ++x) {
+        for(unsigned y = 0; y < yr; ++y) {
             Ray ray            = camera.GenerateRay({x + (Float)0.5, y + (Float)0.5});
             constexpr uint8_t c255 = std::numeric_limits<uint8_t>::max();
             Intersection ints;
@@ -203,7 +203,7 @@ void HW5234(int xr, int yr, FrameBuffer<RGBColor> &rgbfr) {
     }
 }
 
-void Homework(int width, int height, const Platform::Path &output) {
+void Homework(unsigned width, unsigned height, const Platform::Path &output) {
 
     // Just stupid hacks to generate the homework images
     // To generate the images run:
@@ -250,9 +250,9 @@ void Homework(int width, int height, const Platform::Path &output) {
 }
 
 void RenderNormals(const Scene &scene, FrameBuffer<Color> &rgbfr) {
-    for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+    for(unsigned x = 0; x < scene.camera->film.resolution.x; ++x) {
         fprintf(stderr, "x = %5d %5.2f%%\r", x, 100. * (x + 1) / scene.camera->film.resolution.x);
-        for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+        for(unsigned y = 0; y < scene.camera->film.resolution.y; ++y) {
             Ray ray            = scene.camera->GenerateRay({x + (Float)0.5, y + (Float)0.5});
             Intersection ints;
             if(scene.Intersect(ray, &ints)) {
@@ -271,7 +271,7 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
             Color color{};
             if(1 > ints.material->surfaceSmoothness) {
                 // The surface is at least a bit diffuse. Do Lambertian lighting.
-                for each(const auto &light in scene.pointLights) {
+                for(const auto &light : scene.pointLights) {
                     Intersection lightints;
                     // It seems to me that the "shadowBias" suggested in lecture 8 is better served
                     // by a non-zero ray minimum time - see raytolight below.
@@ -311,21 +311,21 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, int depth) {
     }
 }
 
-void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr, const int raysperpixel) {
-    std::srand(std::time(nullptr));
+void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr, const unsigned raysperpixel) {
+    std::srand((unsigned)std::time(nullptr));
     std::atomic_int progress = 0;
 #pragma omp parallel for
-    for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
+    for(int x = 0; (unsigned)x < scene.camera->film.resolution.x; ++x) {  // OpenMP wants `int`
         int p = progress++;
         fprintf(stderr, "x = %5d %5.2f%%\r", p, 100. * (p + 1) / scene.camera->film.resolution.x);
-        for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+        for(unsigned y = 0; y < scene.camera->film.resolution.y; ++y) {
             Color color{};
-            for(int aa = 0; aa < raysperpixel; ++aa) {
+            for(unsigned aa = 0; aa < raysperpixel; ++aa) {
                 Ray ray = scene.camera->GenerateRay({x + (Float)std::rand() / RAND_MAX,
                                                      y + (Float)std::rand() / RAND_MAX});
                 color += WhittedIntegrate(scene, ray, 5);
             }
-            rgbfr[x][y] = color / raysperpixel;
+            rgbfr[(unsigned)x][y] = color / raysperpixel;
         }
     }
 }
@@ -335,7 +335,7 @@ void Render(const Scene &scene, FrameBuffer<Color> &rgbfr) {
         // Darkness rules the land. Visualize the underlying maths :-)
         RenderNormals(scene, rgbfr);
     } else {
-        RenderWhitted(scene, rgbfr, 4);
+        RenderWhitted(scene, rgbfr, 4); // PAR@@@@@ the number of rays per pixel should come from outside
     }
 }
 

@@ -5,7 +5,7 @@
 
 class Film {
 public:
-    Point2i resolution;     // x*y e.g. 1024x768
+    Point2u resolution;     // x*y e.g. 1024x768
     Float diagonal;         // In meters in world space
 };
 

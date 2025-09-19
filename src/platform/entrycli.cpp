@@ -150,8 +150,8 @@ static bool RunCommand(const std::vector<std::string> args) {
             
             // find the peak color value in the whole frame buffer
             Float cmax = std::numeric_limits<Float>::min();
-            for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
-                for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+            for(unsigned x = 0; x < scene.camera->film.resolution.x; ++x) {
+                for(unsigned y = 0; y < scene.camera->film.resolution.y; ++y) {
                     Color c = rgbfr[x][y];
                     if(c.r > cmax) { cmax = c.r; }
                     if(c.g > cmax) { cmax = c.g; }
@@ -163,8 +163,8 @@ static bool RunCommand(const std::vector<std::string> args) {
             const Float gamma  = 1/2.2; // 2.2 is the standard sRGB gamma
             cmax = pow(cmax, gamma);
             constexpr uint8_t c255 = std::numeric_limits<uint8_t>::max();
-            for(int x = 0; x < scene.camera->film.resolution.x; ++x) {
-                for(int y = 0; y < scene.camera->film.resolution.y; ++y) {
+            for(unsigned x = 0; x < scene.camera->film.resolution.x; ++x) {
+                for(unsigned y = 0; y < scene.camera->film.resolution.y; ++y) {
                     fr[x][y] = {(uint8_t)(pow(rgbfr[x][y].r, gamma) * c255 / cmax),
                                 (uint8_t)(pow(rgbfr[x][y].g, gamma) * c255 / cmax),
                                 (uint8_t)(pow(rgbfr[x][y].b, gamma) * c255 / cmax)};

@@ -120,7 +120,7 @@ public:
     inline Quaternion &operator+=(const Quaternion &q) { v += q.v; w += q.w; return *this; }
     inline auto operator-=(const Quaternion &q) { return *this += -q; }
     inline auto operator*=(const Float t) { v *= t; w *= t; return *this; }
-    inline auto &operator/=(const Float t) { return *this *= (1 / t); }
+    inline auto operator/=(const Float t) { return *this *= (1 / t); }
 
     inline bool operator==(const Quaternion &q) const { return v == q.v && w == q.w; }
     // Should this or the operator== be the exact comparison? Which one will I use more often?
@@ -171,7 +171,7 @@ public:
     }
 
     static Quaternion From(Vector axis, Float dtheta) {
-        Float c = cos(dtheta / 2), s = sin(dtheta / 2);
+        Float c = cos(dtheta / 2.), s = sin(dtheta / 2.);
         axis = axis.WithMagnitude(s);
         return {axis, c};
     }
@@ -180,32 +180,32 @@ public:
         Vector n = u.Cross(v);
 
         Quaternion q;
-        double s, tr = 1 + u.x + v.y + n.z;
+        Float s, tr = 1 + u.x + v.y + n.z;
         if(tr > 1e-4) {
-            s    = 2 * sqrt(tr);
-            q.w  = s / 4;
+            s    = 2. * sqrt(tr);
+            q.w  = s / 4.;
             q.v.x = (v.z - n.y) / s;
             q.v.y = (n.x - u.z) / s;
             q.v.z = (u.y - v.x) / s;
         } else {
             if(u.x > v.y && u.x > n.z) {
-                s    = 2 * sqrt(1 + u.x - v.y - n.z);
+                s    = 2. * sqrt(1 + u.x - v.y - n.z);
                 q.w  = (v.z - n.y) / s;
-                q.v.x = s / 4;
+                q.v.x = s / 4.;
                 q.v.y = (u.y + v.x) / s;
                 q.v.z = (n.x + u.z) / s;
             } else if(v.y > n.z) {
-                s    = 2 * sqrt(1 - u.x + v.y - n.z);
+                s    = 2. * sqrt(1 - u.x + v.y - n.z);
                 q.w  = (n.x - u.z) / s;
                 q.v.x = (u.y + v.x) / s;
                 q.v.y = s / 4;
                 q.v.z = (v.z + n.y) / s;
             } else {
-                s    = 2 * sqrt(1 - u.x - v.y + n.z);
+                s    = 2. * sqrt(1 - u.x - v.y + n.z);
                 q.w  = (u.y - v.x) / s;
                 q.v.x = (n.x + u.z) / s;
                 q.v.y = (v.z + n.y) / s;
-                q.v.z = s / 4;
+                q.v.z = s / 4.;
             }
         }
 
@@ -215,36 +215,36 @@ public:
 	// Quaternion from a 3x3 rotation matrix, rows u, v, n
     static Quaternion From(Vector u, Vector v, Vector n) {
         Quaternion q;
-        double s, tr = 1 + u.x + v.y + n.z;
+        Float s, tr = 1 + u.x + v.y + n.z;
         if(tr > 1e-4) {
-            s     = 2 * sqrt(tr);
-            q.w   = s / 4;
+            s     = 2. * sqrt(tr);
+            q.w   = s / 4.;
             q.v.x = (v.z - n.y) / s;
             q.v.y = (n.x - u.z) / s;
             q.v.z = (u.y - v.x) / s;
         } else {
             if(u.x > v.y && u.x > n.z) {
-                s     = 2 * sqrt(1 + u.x - v.y - n.z);
+                s     = 2. * sqrt(1 + u.x - v.y - n.z);
                 q.w   = (v.z - n.y) / s;
-                q.v.x = s / 4;
+                q.v.x = s / 4.;
                 q.v.y = (u.y + v.x) / s;
                 q.v.z = (n.x + u.z) / s;
             } else if(v.y > n.z) {
-                s     = 2 * sqrt(1 - u.x + v.y - n.z);
+                s     = 2. * sqrt(1 - u.x + v.y - n.z);
                 q.w   = (n.x - u.z) / s;
                 q.v.x = (u.y + v.x) / s;
-                q.v.y = s / 4;
+                q.v.y = s / 4.;
                 q.v.z = (v.z + n.y) / s;
             } else {
-                s     = 2 * sqrt(1 - u.x - v.y + n.z);
+                s     = 2. * sqrt(1 - u.x - v.y + n.z);
                 q.w   = (u.y - v.x) / s;
                 q.v.x = (n.x + u.z) / s;
                 q.v.y = (v.z + n.y) / s;
-                q.v.z = s / 4;
+                q.v.z = s / 4.;
             }
         }
 
-        return q.WithMagnitude(1);
+        return q.WithMagnitude(1.);
     }
 };
 
@@ -313,6 +313,7 @@ public:
 using Vector2f = Vector2<Float>;
 using Point2f = Vector2f;
 using Point2i = Vector2<int>;
+using Point2u  = Vector2<unsigned>;
 
 // Linearly interpolates a vale t in [0,1] to a value in the range [a,b]
 // Didn't know this was called a LERP :-)

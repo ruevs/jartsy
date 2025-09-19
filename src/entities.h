@@ -19,7 +19,7 @@ class TriangleMesh {
 public:
     unsigned nPoints;
     unsigned nTri;
-    // The triangle mesh consists of a point cloud "p". Triangles are descriped with an index "v"
+    // The triangle mesh consists of a point cloud "p". Triangles are described with an index "v"
     // into the point cloud listing indexes of the vertexes (v0, v1, v2) of each triangle in order.
     // "n" are the triangle normals for each triangle in the same oreder as the index.
     Point *p;
@@ -34,7 +34,7 @@ public:
     void CalclulateNormals(bool normalize=true);
 
 private:
-    inline bool IntersectTriangle(Ray &r, int tri, Intersection *ints) const;
+    inline bool IntersectTriangle(Ray &r, unsigned tri, Intersection *ints) const;
 };
 
 class Sphere {

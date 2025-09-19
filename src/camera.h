@@ -17,16 +17,16 @@ public:
     const Float focalLength; // In meters
 
     Camera(Transform tr, Film f, Float fl, Float so = 0, Float sc = 0)
-        : transform(tr), film(f), focalLength(fl), tso(so), tsc(sc) {
+        : tso(so), tsc(sc), transform(tr), film(f), focalLength(fl) {
         // Calculate the transformation from film/sensor pixel coordinates to world coordinates
-        // There is a silent presumtion of square pixels here
+        // There is a silent presumption of square pixels here
         Float aspect       = (Float)f.resolution.y / (Float)f.resolution.x;
         Float x            = sqrt(Sqr(film.diagonal) / (1 + Sqr(aspect)));
         Float y            = aspect * x;
         Vector scPixel2NDC = {(Float)1 / f.resolution.x, (Float)1 / f.resolution.y, 1};
         Vector scNDC2Film  = {x, -y, 1};
         Vector scPic2Film  = scPixel2NDC * scNDC2Film;
-        // Same as above. I'll delete one when I debug it and am sure I'm not crazy :-)
+        // PAR@@@@ Same as above. I'll delete one when I debug it and am sure I'm not crazy :-)
         Vector scPix2Film = {x / f.resolution.x, -y / f.resolution.y, 1};
 		// The camera points in the -Z direction with the XY plane of a right handed
 		// coordinate system being the "film" plane

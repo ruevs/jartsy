@@ -4,24 +4,24 @@
 template<class T>
 class FrameBuffer {
 public:
-    const size_t rx, ry;
+    const unsigned rx, ry;
     T **buf;
 
-    FrameBuffer(size_t x, size_t y) : rx(x), ry(y) {
+    FrameBuffer(unsigned x, unsigned y) : rx(x), ry(y) {
         buf = new T*[rx];
-        for(int i = 0; i < rx; ++i) {
+        for(unsigned i = 0; i < rx; ++i) {
             buf[i] = new T[ry];
         }
     }
 
     ~FrameBuffer(){
-        for(int i = 0; i < rx; ++i) {
+        for(unsigned i = 0; i < rx; ++i) {
             delete buf[i];
         }
         delete buf;
     }
 
-    inline T *operator[](size_t x) {
+    inline T *operator[](unsigned x) {
         return buf[x];
     }
 };
