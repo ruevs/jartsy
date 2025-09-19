@@ -1,5 +1,5 @@
 # cmake configuration
-cmake_minimum_required(VERSION 3.9...3.19)
+cmake_minimum_required(VERSION 3.18...3.25)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR
@@ -72,6 +72,12 @@ endif()
 if(MINGW)
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -static-libgcc")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        # Link 32 bit Jartsy with --large-address-aware which allows it to access
+        # up to 3GB on a properly configured 32 bit Windows and up to 4GB on 64 bit.
+        # See https://msdn.microsoft.com/en-us/library/aa366778
+        set(CMAKE_EXE_LINKER_FLAGS "-Wl,--large-address-aware")
+    endif()
 endif()
 
 # Ensure that all platforms use 64-bit IEEE floating point operations for consistency;
@@ -98,10 +104,10 @@ if(ENABLE_OPENMP)
     find_package( OpenMP REQUIRED )
     if(OPENMP_FOUND)
         add_library(jartsy_openmp INTERFACE)
-        target_compile_options(jartsy_openmp INTERFACE ${OpenMP_CXX_FLAGS})
+        target_compile_options(jartsy_openmp INTERFACE "SHELL:${OpenMP_CXX_FLAGS}")
         target_link_libraries(jartsy_openmp INTERFACE
             ${OpenMP_CXX_LIBRARIES})
-        target_include_directories(jartsy_openmp INTERFACE SYSTEM
+        target_include_directories(jartsy_openmp SYSTEM INTERFACE
             ${OpenMP_CXX_INCLUDE_DIRS})
         message(STATUS "found OpenMP, compiling with flags: " ${OpenMP_CXX_FLAGS} )
     endif()
@@ -113,44 +119,52 @@ endif()
 
 if(ENABLE_SANITIZERS)
     if(NOT SANITIZERS)
-        set(SANITIZERS "address;undefined")
+        if(MSVC)
+            if(MSVC_VERSION LESS 1928)
+                # Technically 1928 is also used for VS 16.8, but CMake doesn't have a way
+                # to distinguish patch versions of MSVC, so this is good enough
+                message(FATAL_ERROR "Using sanitizers with MSVC requires Visual Studio 16.9 or newer")
+            endif()
+            set(SANITIZERS "address")
+        else()
+            set(SANITIZERS "address;undefined")
+        endif()
     endif()
 
-    if("thread" IN_LIST SANITIZERS)
-        list(REMOVE_ITEM SANITIZERS "thread")
-        list(APPEND SANITIZE_OPTIONS thread)
-    endif()
-    if("address" IN_LIST SANITIZERS)
-        list(REMOVE_ITEM SANITIZERS "address")
-        list(APPEND SANITIZE_OPTIONS address)
-    endif()
-    if("undefined" IN_LIST SANITIZERS)
-        list(REMOVE_ITEM SANITIZERS "undefined")
-        list(APPEND SANITIZE_OPTIONS alignment bounds)
-        list(APPEND SANITIZE_OPTIONS shift signed-integer-overflow integer-divide-by-zero)
-        list(APPEND SANITIZE_OPTIONS null bool enum)
-        list(APPEND SANITIZE_OPTIONS return)
-    endif()
-    if(SANITIZERS)
-        message(FATAL_ERROR "Unknown sanitizer(s) ${SANITIZERS}")
+    foreach(option ${SANITIZERS})
+        if(option STREQUAL "thread" AND NOT MSVC)
+            list(APPEND SANITIZE_OPTIONS thread)
+        elseif(option STREQUAL "address")
+            list(APPEND SANITIZE_OPTIONS address)
+        elseif(option STREQUAL "undefined" AND NOT MSVC)
+            list(APPEND SANITIZE_OPTIONS alignment bounds)
+            list(APPEND SANITIZE_OPTIONS shift signed-integer-overflow integer-divide-by-zero)
+            list(APPEND SANITIZE_OPTIONS null bool enum)
+            list(APPEND SANITIZE_OPTIONS return)
+        else()
+            message(FATAL_ERROR "Unknown sanitizer ${option}")
+        endif()
+    endforeach()
+
+    message(STATUS "Using sanitizer options ${SANITIZE_OPTIONS}")
+
+    if(MSVC)
+        string(REPLACE ";" " /fsanitize=" SANITIZE_OPTIONS "${SANITIZE_OPTIONS}")
+        set(SANITIZE_FLAGS "/Zi /fsanitize=${SANITIZE_OPTIONS}")
     else()
-        message(STATUS "Using sanitizer options ${SANITIZE_OPTIONS}")
-    endif()
-
-    string(REPLACE ";" "," SANITIZE_OPTIONS "${SANITIZE_OPTIONS}")
-
-    if (NOT APPLE)
-        set(SANITIZE_FLAGS "-O1 -fsanitize=${SANITIZE_OPTIONS} -fno-sanitize-recover=address,undefined")
-    else()
+        string(REPLACE ";" "," SANITIZE_OPTIONS "${SANITIZE_OPTIONS}")
         set(SANITIZE_FLAGS "-O1 -fsanitize=${SANITIZE_OPTIONS}")
+        if (NOT APPLE)
+            set(SANITIZE_FLAGS "${SANITIZE_FLAGS} -fno-sanitize-recover=address,undefined")
+        endif()
     endif()
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(SANITIZE_FLAGS "${SANITIZE_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
         set(SANITIZE_FLAGS "${SANITIZE_FLAGS} -fuse-ld=gold")
-    else()
-        message(FATAL_ERROR "Sanitizers are only available when using GCC or Clang")
+    elseif(NOT MSVC)
+        message(FATAL_ERROR "Sanitizers are only available when using MSVC, GCC, or Clang")
     endif()
 
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${SANITIZE_FLAGS}")
@@ -160,7 +174,7 @@ endif()
 # common dependencies
 
 if(APPLE)
-    set(CMAKE_FIND_FRAMEWORK LAST)
+    set(CMAKE_FIND_FRAMEWORK FIRST)
 endif()
 
 # jartsy-only compiler flags
@@ -190,9 +204,23 @@ if(MSVC)
     # Same for the (C99) __func__ special variable; we use it only in C++ code.
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D__func__=__FUNCTION__")
 
+    # Multi-processor Compilation
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+    # C++ standard conformance mode
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /permissive-")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
+
     # We rely on these /we flags. They correspond to the GNU-style flags below as
     # follows: /w4062=-Wswitch
     set(WARNING_FLAGS   "${WARNING_FLAGS} /we4062")
+
+    # Link 32 bit Jartsy with /LARGEADDRESSAWARE which allows it to access
+    # up to 3GB on a properly configured 32 bit Windows and up to 4GB on 64 bit.
+    # See https://msdn.microsoft.com/en-us/library/aa366778
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
