@@ -116,6 +116,27 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
         }
     }
 
+    if(j.contains("parallel_lights")) {
+        for(auto &l : j["parallel_lights"]) {
+            Color c;
+            if(l.contains("color")) { // PAR@@ crtscene does not have coloured lights?!
+                c.r = l["color"][0];
+                c.g = l["color"][1];
+                c.b = l["color"][2];
+            } else {
+                c = {1., 1., 1.};
+            }
+            SunLight light{{
+                                 l["direction"][0],
+                                 l["direction"][1],
+                                 l["direction"][2],
+                             },
+                             l["intensity"],
+                             c};
+            scene.parallelLights.push_back(light);
+        }
+    }
+
     if(j.contains("materials")) {
         for(auto &m : j["materials"]) {
             Material mat{{},
@@ -144,6 +165,15 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
                     m["transmission"][2],
                 };
                 mat.surfaceSmoothness = m["smoothness"];
+                if(m.contains("emission")) {
+                    mat.emitter  = true;
+                    mat.c = {
+                        m["emission"]["color"][0],
+                        m["emission"]["color"][1],
+                        m["emission"]["color"][2],
+                    };
+                    mat.intensity = m["emission"]["intensity"];
+                }
             } else {
                 mat.surfaceSmoothness = .5; // PAR
             }

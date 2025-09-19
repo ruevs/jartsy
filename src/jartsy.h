@@ -10,7 +10,7 @@
 #include "platform/platform.h"
 
 // The type of floating point number used throughout (float or double or whatever)
-using Float = float;
+using Float = double;//float;
 static constexpr Float LENGTH_EPS = 1e-6;
 
 // The few floating-point equality comparisons in jartsy should have been

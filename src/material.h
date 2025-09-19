@@ -43,6 +43,10 @@ public:
         return r == c.r && g == c.g && b == c.b;
     };
 
+    inline bool operator!=(const Color &c) const {
+        return !(*this == c);
+    }
+
     inline Color operator+(const Color &c) const {
         return {r + c.r, g + c.g, b + c.b};
     }
@@ -73,6 +77,9 @@ public:
     Float surfaceSmoothness;    // 1 = perfectly flat (mirror), 0 = perfectly diffuse PAR@@?
     // For the crtscene format - controls whether flat or smooth shading is used for triangle meshes
     bool smoothShading = false;
+    bool emitter = false;
+    Color c;        // The color of the light that the object emits. (e.g. black body/heated metal)
+    Float intensity;
 };
 
 #endif
