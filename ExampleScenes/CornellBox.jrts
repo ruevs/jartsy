@@ -117,7 +117,7 @@
 			"smoothness": 0.2,
 			"smooth_shading": true,
 			"emission": {
-				"intensity": 100,
+				"intensity": 4,
 				"color": [1, 1, 1]
 			}
 		}
