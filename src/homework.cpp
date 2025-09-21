@@ -272,10 +272,10 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, bool *hit, int depth) {
             Color color{};
             if(1 > ints.material->surfaceSmoothness) {
                 // The surface is at least a bit diffuse. Do Lambertian lighting.
-                for(const auto &light : scene.pointLights) {
+                for(const auto &light : scene.Lights) {
                     // It seems to me that the "shadowBias" suggested in lecture 8 is better served
                     // by a non-zero ray minimum time - see RayToLight implementation.
-                    Ray raytolight = light.RayToLight(ints.ip /* + ints.n * 0.01*/);
+                    Ray raytolight = light->RayToLight(ints.ip /* + ints.n * 0.01*/);
                     
                     bool didnotreachlight;
                     Color tmpc = WhittedIntegrate(scene, raytolight, &didnotreachlight, depth - 1);
@@ -295,41 +295,21 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, bool *hit, int depth) {
                     } else {
                         auto lambertian = ints.n.Dot(raytolight.d);
                         if(0 < lambertian) {
-                            // tInt is the distance to the light
-                            color += (1 - ints.material->surfaceSmoothness) * lambertian *
-                                     light.intensity * light.c * ints.material->reflectance /
-                                     (4 * M_PI * raytolight.tInt * raytolight.tInt);
-                        } else {
-                        }
-                    }
-                }
-                // PAR@@@ Ugly copy-pasta... add a base light class? But it's slightly different
-                for(const auto &light : scene.parallelLights) {
-                    // It seems to me that the "shadowBias" suggested in lecture 8 is better served
-                    // by a non-zero ray minimum time - see RayToLight implementation.
-                    Ray raytolight = light.RayToLight(ints.ip /* + ints.n * 0.01*/);
-
-                    bool didnotreachlight;
-                    Color tmpc = WhittedIntegrate(scene, raytolight, &didnotreachlight, depth - 1);
-                    if(didnotreachlight) {
-                        // We hit an object PATH tracing ?!?
-                        if(Color{0, 0, 0} != tmpc) {
-                            // Some light came from the object. Add it to the ray.
-                            auto lambertian = ints.n.Dot(raytolight.d);
-                            if(0 < lambertian) {
-                                // The distance this light travelled was taken into account at
-                                // the emitting object. So no quadratic falloff here.
+                            Intersection lint;
+                            light->Intersect(raytolight, &lint);
+                            if(std::numeric_limits<Float>::max() != raytolight.tInt) {
+                                // Not a parallel light at infinity.
+                                // tInt is the distance to the light
                                 color += (1 - ints.material->surfaceSmoothness) * lambertian *
-                                         tmpc * ints.material->reflectance;
+                                         lint.material->intensity * lint.material->c *
+                                         ints.material->reflectance /
+                                         (4 * M_PI * raytolight.tInt * raytolight.tInt);
                             } else {
+                                // No quadratic falloff for an ideal parallel beam at infinity
+                                color += (1 - ints.material->surfaceSmoothness) * lambertian *
+                                         lint.material->intensity * lint.material->c *
+                                         ints.material->reflectance;
                             }
-                        }
-                    } else {
-                        auto lambertian = ints.n.Dot(raytolight.d);
-                        if(0 < lambertian) {
-                            // No quadratic falloff since it is an ideal parallel beam at infinity
-                            color += (1 - ints.material->surfaceSmoothness) * lambertian *
-                                     light.intensity * light.c * ints.material->reflectance;
                         } else {
                         }
                     }
@@ -389,7 +369,7 @@ void RenderWhitted(const Scene &scene, FrameBuffer<Color> &rgbfr, const unsigned
 }
 
 void Render(const Scene &scene, FrameBuffer<Color> &rgbfr) {
-    if((0 == scene.pointLights.size()) && (0 == scene.parallelLights.size())) {
+    if(0 == scene.Lights.size()) {
         // Darkness rules the land. Visualize the underlying maths :-)
         RenderNormals(scene, rgbfr);
     } else {

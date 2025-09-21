@@ -26,8 +26,7 @@ public:
     std::vector<Sphere> spheres;
     std::vector<Material> materials;
 
-    std::vector<PointLight> pointLights;
-    std::vector<SunLight> parallelLights;
+    std::vector<std::unique_ptr<Light>> Lights;
 
     std::vector<Transform> transforms;
 
@@ -97,43 +96,41 @@ void ParseCRTSceneFile(const Platform::Path &input, Scene &scene) {
 
     if(j.contains("lights")) {
         for(auto &l : j["lights"]) {
-            Color c;
+            Material mat{{}, {}, {}, 0., false, /* emitter */ true, {}, 0.};
             if(l.contains("color")) { // PAR@@ crtscene does not have coloured lights?!
-                c.r = l["color"][0];
-                c.g = l["color"][1];
-                c.b = l["color"][2];
+                mat.c.r = l["color"][0];
+                mat.c.g = l["color"][1];
+                mat.c.b = l["color"][2];
             } else {
-                c = {1., 1., 1.};
+                mat.c = {1., 1., 1.};
             }
-            PointLight light{{
+            mat.intensity = l["intensity"];
+            scene.Lights.push_back(std::make_unique<PointLight>(Point{
                                  l["position"][0],
                                  l["position"][1],
                                  l["position"][2],
                              },
-                             l["intensity"],
-                             c};
-            scene.pointLights.push_back(light);
+                             mat));
         }
     }
 
     if(j.contains("parallel_lights")) {
         for(auto &l : j["parallel_lights"]) {
-            Color c;
+            Material mat{{}, {}, {}, 0., false, /* emitter */ true, {}, 0.};
             if(l.contains("color")) { // PAR@@ crtscene does not have coloured lights?!
-                c.r = l["color"][0];
-                c.g = l["color"][1];
-                c.b = l["color"][2];
+                mat.c.r = l["color"][0];
+                mat.c.g = l["color"][1];
+                mat.c.b = l["color"][2];
             } else {
-                c = {1., 1., 1.};
+                mat.c = {1., 1., 1.};
             }
-            SunLight light{{
+            mat.intensity = l["intensity"];
+            scene.Lights.push_back(std::make_unique<SunLight>(Point{
                                  l["direction"][0],
                                  l["direction"][1],
                                  l["direction"][2],
                              },
-                             l["intensity"],
-                             c};
-            scene.parallelLights.push_back(light);
+                             mat));
         }
     }
 
