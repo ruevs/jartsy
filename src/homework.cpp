@@ -288,8 +288,7 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, bool *hit, int depth) {
                                 // The distance this light travelled was taken into account at
                                 // the emitting object. So no quadratic falloff here.
                                 color += (1 - ints.material->surfaceSmoothness) * lambertian *
-                                         tmpc * ints.material->reflectance /
-                                         (4 * M_PI * raytolight.tInt * raytolight.tInt);
+                                         tmpc * ints.material->reflectance;
                             } else {
                             }
                         }
