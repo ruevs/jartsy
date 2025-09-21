@@ -12,6 +12,8 @@
 // The type of floating point number used throughout (float or double or whatever)
 using Float = double;//float;
 static constexpr Float LENGTH_EPS = 1e-6;
+// Fudge factor to avod the inverse square law blowing up at distance << 1
+static constexpr Float CLOSEST_DISTANCE = 0.1;
 
 // The few floating-point equality comparisons in jartsy should have been
 // carefully considered, so we disable the -Wfloat-equal warning for them

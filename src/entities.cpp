@@ -50,7 +50,7 @@ inline bool TriangleMesh::IntersectTriangle(Ray &r, unsigned tri, Intersection *
                         return false;
                     }
                 }
-                r.tInt = rt; // Remember the intersection distance
+                r.tInt = std::max(rt, CLOSEST_DISTANCE);    // Remember the intersection distance
                 // PAR@@@@ Here we fill in a structure that describes the
                 // intersection - which entity, from which side etc...
                 ints->ip = ip;
@@ -104,7 +104,7 @@ bool Sphere::Intersect(Ray &r, Intersection *ints) const {
             return false;
     }
 
-    r.tInt         = root;
+    r.tInt         = std::max(root, CLOSEST_DISTANCE);
     ints->ip       = r.o + r.d * r.tInt;
     ints->n        = (ints->ip - center) / radius;
     ints->material = material;
