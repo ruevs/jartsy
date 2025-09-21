@@ -6,16 +6,32 @@
 #include "material.h"
 #include "entities.h"
 
+class Light {
+    Vector VectorTo(const Point &from) const;
+    Ray RayToLight(const Point from) const;
+    bool Intersect(const Ray &r, Intersection *ints) const;
+};
+
 // An "ideal" point light source
-class PointLight {
+class PointLight : Light {
 public:
     Point p;
     Float intensity;
     Color c;
 
+    PointLight(Point pt, Float i, Color col) : p(pt), intensity(i), c(col){};
+
     inline Vector VectorTo(const Point &from) const {
         return p - from;
     };
+
+    Ray RayToLight(const Point from) const {
+        Vector lightDir = VectorTo(from);
+        // It seems to me that the "shadowBias" suggested in lecture 8 is better served
+        // by a non-zero ray minimum time.
+        return {from, lightDir.WithMagnitude(1.), 0., 10 * LENGTH_EPS, lightDir.Magnitude()};
+    }
+
     inline bool Intersect(const Ray &r, Intersection *ints) const {
         // Presuming that the ray direction is already normalized
         Vector rayToLight      = VectorTo(r.o);
@@ -37,16 +53,27 @@ public:
 
 // A parallel beam light coming from some direction 
 // and filling all space. Like Sun light on Earth scale.
-class SunLight {
+class SunLight : Light {
 public:
     Vector direction;
     Float intensity;
     Color c;
 
+    SunLight(Vector d, Float i, Color col) : direction(d), intensity(i), c(col){};
+
     inline Vector VectorTo(const Point &from) const {
         (void)from; // unused
         return -direction;
     };
+
+    Ray RayToLight(const Point from) const {
+        Vector lightDir = VectorTo(from);
+        // It seems to me that the "shadowBias" suggested in lecture 8 is better served
+        // by a non-zero ray minimum time.
+        return {from, lightDir.WithMagnitude(1.), 0., 10 * LENGTH_EPS,
+                std::numeric_limits<Float>::max() /* parallel light from infinity */};
+    }
+
     bool Intersect(Ray &r, Intersection *ints) const {
         // PAR@@@@@@ Implement this!!!!
         // PAR@@@@@@ how should I fill ints->ip

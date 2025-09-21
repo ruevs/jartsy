@@ -274,11 +274,8 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, bool *hit, int depth) {
                 // The surface is at least a bit diffuse. Do Lambertian lighting.
                 for(const auto &light : scene.pointLights) {
                     // It seems to me that the "shadowBias" suggested in lecture 8 is better served
-                    // by a non-zero ray minimum time - see raytolight below.
-                    Vector lightDir = light.VectorTo(ints.ip /* + ints.n * 0.01*/);
-
-                    Ray raytolight{ints.ip, lightDir.WithMagnitude(1), 0., 10 * LENGTH_EPS,
-                                   lightDir.Magnitude()};
+                    // by a non-zero ray minimum time - see RayToLight implementation.
+                    Ray raytolight = light.RayToLight(ints.ip /* + ints.n * 0.01*/);
                     
                     bool didnotreachlight;
                     Color tmpc = WhittedIntegrate(scene, raytolight, &didnotreachlight, depth - 1);
@@ -310,11 +307,8 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, bool *hit, int depth) {
                 // PAR@@@ Ugly copy-pasta... add a base light class? But it's slightly different
                 for(const auto &light : scene.parallelLights) {
                     // It seems to me that the "shadowBias" suggested in lecture 8 is better served
-                    // by a non-zero ray minimum time - see raytolight below.
-                    Vector lightDir = light.VectorTo(ints.ip /* + ints.n * 0.01*/);
-
-                    Ray raytolight{ints.ip, lightDir.WithMagnitude(1), 0., 10 * LENGTH_EPS
-                                   /*, std::numeric_limits<Float>::max() - parallel light from infinity */};
+                    // by a non-zero ray minimum time - see RayToLight implementation.
+                    Ray raytolight = light.RayToLight(ints.ip /* + ints.n * 0.01*/);
 
                     bool didnotreachlight;
                     Color tmpc = WhittedIntegrate(scene, raytolight, &didnotreachlight, depth - 1);
