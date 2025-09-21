@@ -265,10 +265,10 @@ void RenderNormals(const Scene &scene, FrameBuffer<Color> &rgbfr) {
 }
 
 Color WhittedIntegrate(const Scene &scene, Ray ray, bool *hit, int depth) {
-    if(0 < depth) {
-        Intersection ints;
-        if(scene.Intersect(ray, &ints)) {
-            *hit = true;
+    Intersection ints;
+    if(scene.Intersect(ray, &ints)) {
+        *hit = true;
+        if(0 < depth) {
             Color color{};
             if(1 > ints.material->surfaceSmoothness) {
                 // The surface is at least a bit diffuse. Do Lambertian lighting.
@@ -339,12 +339,11 @@ Color WhittedIntegrate(const Scene &scene, Ray ray, bool *hit, int depth) {
 
             return color;
         } else {
-            *hit = false;
-            return scene.settings.bgColor;
+            return {}; // Darkness at the end of rays :-)
         }
     } else {
         *hit = false;
-        return {};  // Darkness at the end of rays :-)
+        return scene.settings.bgColor;
     }
 }
 
